@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,15 +11,21 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import FavoriteIcon from "../../components/FavoriteIcon";
 import ShareTeacherButton from "../../components/ShareTeacherButton";
 // import YoutubeIframe from "react-native-youtube-iframe";
+import { useNavigation } from "@react-navigation/native";
+import AuthModal from "../../components/modals/AuthModal";
+import { useSelector, useDispatch } from "react-redux"; // Redux import
 
 const TeacherInfoScreen = ({ route, navigation }) => {
   const { teacher, teacherId, topicName } = route.params;
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [videoReady, setVideoReady] = React.useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isLoggedIn } = useSelector((state) => state.user); // Check if user is logged in
+
   const thumbnailUrl = `https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg`;
-
+  navigation = useNavigation();
   const handlePlay = () => setIsPlaying(true);
-
+  console.log(teacher, teacherId);
   return (
     <View style={styles.container}>
       {/* Main Content */}
@@ -78,6 +84,10 @@ const TeacherInfoScreen = ({ route, navigation }) => {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>عدد التقييمات</Text>
             <Text style={styles.infoValue}>{teacher.ratingCount}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>عدد الدروس</Text>
+            <Text style={styles.infoValue}>1k</Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>لكل 50 دقيقة</Text>
@@ -139,18 +149,38 @@ const TeacherInfoScreen = ({ route, navigation }) => {
         >
           <Text style={styles.bookLessonText}>حجز درس</Text>
         </TouchableOpacity>
-        <Icon
-          name="email-fast-outline"
-          size={35}
-          color="#555"
-          style={{
-            borderWidth: 1.5,
-            padding: 13,
-            borderRadius: 5,
-            borderColor: "#d9d9d9",
+        <TouchableOpacity
+          onPress={() => {
+            if (!isLoggedIn) {
+              // ❌ User not logged in → Show Auth Modal
+              setShowAuthModal(true); // ✅ Open AuthModal
+              return;
+            }
+
+            // ✅ User is logged in → Go to Chat Screen
+            navigation.navigate("ChatScreen", {
+              receiverId: teacherId, // or whatever you pass
+              teacher: teacher,
+            });
           }}
-        />
+        >
+          <Icon
+            name="email-fast-outline"
+            size={35}
+            color="#555"
+            style={{
+              borderWidth: 1.5,
+              padding: 13,
+              borderRadius: 5,
+              borderColor: "#d9d9d9",
+            }}
+          />
+        </TouchableOpacity>
       </View>
+      <AuthModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </View>
   );
 };
@@ -166,7 +196,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 200,
     position: "relative",
-    marginTop: 10,
+    marginTop: 5,
   },
   playButton: {
     position: "absolute",
@@ -185,12 +215,12 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 5,
     backgroundColor: "#fff",
     paddingVertical: 20,
     justifyContent: "space-between",
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 5,
     paddingHorizontal: 10,
   },
   iconContainer: { flexDirection: "row", marginRight: 10 },
@@ -207,7 +237,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    marginBottom: 10,
+
     padding: 10,
   },
   infoItem: { alignItems: "center" },
@@ -222,9 +252,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 5,
     padding: 10,
-    marginTop: 10,
+    marginTop: 5,
+    marginBottom: 20,
   },
   bioLabel: {
     fontSize: 16,
@@ -244,7 +275,7 @@ const styles = StyleSheet.create({
   infoSection: {
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 5,
     padding: 10,
   },
   sectionTitle: {

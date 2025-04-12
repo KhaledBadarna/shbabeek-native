@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     alignItems: "center",
-    backgroundColor: "#0efa7c",
+    backgroundColor: "#0efad3",
     width: "48%",
   },
   teachersBtnContainer: {

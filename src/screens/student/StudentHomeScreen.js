@@ -27,7 +27,7 @@ const StudentHomeScreen = ({ navigation }) => {
       topicName: teacher.topics[0],
     });
   };
-
+  console.log("🧠 Redux profileImage:", profileImage);
   useEffect(() => {
     const fetchTeachersData = async () => {
       if (favorites.length > 0) {
@@ -143,7 +143,7 @@ const StudentHomeScreen = ({ navigation }) => {
         <>
           <View
             style={{
-              backgroundColor: "#021012",
+              backgroundColor: "#ffffff",
               marginBottom: 10,
               borderRadius: 10,
               padding: 10,
@@ -153,7 +153,7 @@ const StudentHomeScreen = ({ navigation }) => {
               <Image
                 source={
                   profileImage
-                    ? { uri: profileImage }
+                    ? { uri: `${profileImage}?v=${new Date().getTime()}` } // bust cache
                     : require("../../assets/noUserImage.png")
                 }
                 style={styles.profileImage}
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   greeting: {
-    color: "#00e5ff",
+    color: "#0f0f10",
     fontSize: 16,
     marginBottom: 2,
     textAlign: "right",
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 13,
-    color: "#00e5ff",
+    color: "#1c1d1d",
     marginBottom: 20,
     textAlign: "right",
     writingDirection: "rtl",

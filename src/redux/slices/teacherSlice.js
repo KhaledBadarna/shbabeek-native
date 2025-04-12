@@ -7,7 +7,10 @@ const initialState = {
   topics: [],
   rating: 0,
   ratingCount: 0,
-  bankDetails: {}, // ✅ Added bankDetails
+  bankDetails: {}, // ✅ Bank info
+  pendingPayout: 0,
+  totalEarned: 0,
+  profileImage: "", // optional if you want it here
 };
 
 const teacherSlice = createSlice({
@@ -15,23 +18,14 @@ const teacherSlice = createSlice({
   initialState,
   reducers: {
     setTeacherData(state, action) {
-      const { updatedAt, createdAt, ...cleanData } = action.payload; // ✅ Remove timestamps
-      Object.assign(state, cleanData);
+      const { updatedAt, createdAt, ...cleanData } = action.payload;
+      return { ...state, ...cleanData }; // ✅ Safe shallow merge of new data
     },
-    resetTeacherData(state) {
-      state.bio = "";
-      state.pricePerHour = "";
-      state.stages = [];
-      state.topics = [];
-      state.rating = 0;
-      state.ratingCount = 0;
-      state.bankDetails = {}; // ✅ Reset bank details
-      state.pendingPayout = 0;
-      state.totalEarned = 0;
+    resetTeacherData() {
+      return initialState; // ✅ Clean reset
     },
   },
 });
 
 export const { setTeacherData, resetTeacherData } = teacherSlice.actions;
-
 export default teacherSlice.reducer;

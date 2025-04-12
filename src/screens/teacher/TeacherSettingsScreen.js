@@ -17,10 +17,13 @@ import { firestore } from "../../firebase"; // Assuming firestore is initialized
 import { useSelector } from "react-redux"; // Import Redux
 import { useNavigation, useRoute } from "@react-navigation/native"; // Import Navigation
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useDispatch } from "react-redux";
+import { setTeacherData } from "../../redux/slices/teacherSlice"; // ✅ if not already imported
 
 const TeacherSettingsScreen = () => {
   const navigation = useNavigation(); // Initialize navigation
   const route = useRoute(); // Initialize navigation
+  const dispatch = useDispatch(); // ✅ add this at top
 
   const [selectedTopics, setSelectedTopics] = useState([]); // Store selected topics
   const [selectedStages, setSelectedStages] = useState([]); // Store selected stages
@@ -49,21 +52,23 @@ const TeacherSettingsScreen = () => {
     try {
       const teacherDocRef = doc(firestore, "teachers", userId);
 
-      // ✅ Directly use selectedTopics without filtering
       const teacherData = {
         bio,
         pricePerHour: price,
-        topics: selectedTopics, // ✅ Use directly
+        topics: selectedTopics,
         stages: selectedStages,
-        bankDetails: bankDetails, // ✅ Add bank details
-        updatedAt: new Date().toISOString(), // ✅ Convert to string before saving to Redux
+        bankDetails: bankDetails,
+        updatedAt: new Date().toISOString(),
       };
 
       console.log("📤 Final Data Being Saved to Firestore:", teacherData);
 
       await setDoc(teacherDocRef, teacherData, { merge: true });
 
-      console.log("✅ Teacher data saved successfully!");
+      // ✅ DISPATCH UPDATED DATA TO REDUX
+      dispatch(setTeacherData({ ...teacherData }));
+
+      console.log("✅ Teacher data saved and Redux updated!");
       setHasChanges(false);
     } catch (error) {
       console.error("❌ Error saving teacher data:", error);

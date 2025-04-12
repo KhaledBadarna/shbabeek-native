@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import store from "./src/redux/store";
 
 import BottomTabNavigator from "./src/components/BottomTabNavigator";
-import TeacherInfoScreen from "./src/screens/teacher/TeacherInfoScreen";
+import TeacherInfoScreen from "./src/screens/student/TeacherInfoScreen";
 import TopicTeachersScreen from "./src/screens/student/TopicTeachersScreen";
 import AuthModal from "./src/components/modals/AuthModal";
 import EditBioScreen from "./src/screens/teacher/EditBioScreen";

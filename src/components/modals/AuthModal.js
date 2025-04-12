@@ -23,7 +23,7 @@ import {
   getDoc,
   setDoc,
 } from "firebase/firestore";
-
+import NameImageModal from "../NameImageModal";
 import { registerForPushNotificationsAsync } from "../../utils/notifications/registerForPushNotifications";
 import fetchLessons from "../../utils/fetchLessons";
 const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
@@ -33,6 +33,7 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const [name, setName] = useState("");
   const [role, setRole] = useState("student");
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [showNameImageModal, setShowNameImageModal] = useState(false);
   const phoneInputRef = useRef(null);
   const otpInputs = useRef([]);
   const { userId, userType } = useSelector((state) => state.user);
@@ -78,101 +79,124 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
     }
 
     const code = otp.join("");
+    if (code.length !== 4) return;
 
-    if (code.length === 4) {
-      let userRole = role || "student";
-      const collectionName = userRole === "student" ? "students" : "teachers";
-      let userIdToUse = userId;
+    let userRole = role || "student";
+    const collectionName = userRole === "student" ? "students" : "teachers";
+    let userIdToUse = userId;
+    let existingUser = null;
 
-      try {
-        if (!userIdToUse) {
-          const usersCollectionRef = collection(firestore, collectionName);
-          const q = query(
-            usersCollectionRef,
-            where("phone", "==", cleanedPhone)
-          );
-          const querySnapshot = await getDocs(q);
+    try {
+      if (!userIdToUse) {
+        const usersCollectionRef = collection(firestore, collectionName);
+        const q = query(usersCollectionRef, where("phone", "==", cleanedPhone));
+        const querySnapshot = await getDocs(q);
 
-          if (!querySnapshot.empty) {
-            userIdToUse = querySnapshot.docs[0].id;
-          }
-        }
-
-        if (userIdToUse) {
-          const userDocRef = doc(firestore, collectionName, userIdToUse);
-          let userSnapshot = await getDoc(userDocRef);
-
-          if (userSnapshot.exists()) {
-            let existingUser = userSnapshot.data();
-
-            // 🔧 Add missing default teacher fields if needed
-            const updatedFields = {};
-            if (userRole === "teacher") {
-              if (existingUser.pendingPayout === undefined) {
-                updatedFields.pendingPayout = 0;
-              }
-              if (existingUser.totalEarned === undefined) {
-                updatedFields.totalEarned = 0;
-              }
-              if (!existingUser.bankDetails) {
-                updatedFields.bankDetails = {
-                  fullName: "",
-                  bankNumber: "",
-                  branchBank: "",
-                  accountNumber: "",
-                };
-              }
-            }
-
-            // ✅ Merge only if there are updates
-            if (Object.keys(updatedFields).length > 0) {
-              await setDoc(userDocRef, updatedFields, { merge: true });
-
-              // ⬅️ Re-fetch updated data
-              userSnapshot = await getDoc(userDocRef);
-              existingUser = userSnapshot.data();
-            }
-
-            // ✅ Store user data in Redux
-            dispatch(
-              setUserInfo({
-                name: existingUser.name,
-                phone: existingUser.phone,
-                profileImage: existingUser.profileImage,
-                userId: userIdToUse,
-                defaultPaymentMethod: existingUser.defaultPaymentMethod || "", // ← Add this
-                isLoggedIn: true,
-                userType: userRole,
-              })
-            );
-
-            if (userRole === "teacher") {
-              dispatch(setTeacherData(existingUser));
-            } else if (userRole === "student") {
-              dispatch(setFavorites(existingUser.favorites));
-            }
-
-            // ✅ Fetch lessons for user
-            await fetchLessons(userIdToUse, userRole, dispatch);
-          }
-        }
-      } catch (error) {
-        console.error("❌ Error logging in:", error);
-      }
-
-      // ✅ Second try block for push notifications
-      try {
-        if (userIdToUse && userRole) {
-          await registerForPushNotificationsAsync(userIdToUse, userRole);
-          console.log("✅ Push token registered");
+        if (!querySnapshot.empty) {
+          userIdToUse = querySnapshot.docs[0].id;
         } else {
-          console.log("❌ Missing userId or userRole for push registration");
-        }
+          const userData = {
+            name: "",
+            phone: cleanedPhone,
+            profileImage: "",
+            createdAt: new Date().toISOString(),
+            userType: userRole,
+          };
 
-        onClose();
-      } catch (error) {
-        console.error("🚨 Error during push registration:", error);
+          if (userRole === "teacher") {
+            Object.assign(userData, {
+              pendingPayout: 0,
+              totalEarned: 0,
+              pricePerHour: "",
+              bio: "",
+              bankDetails: {
+                fullName: "",
+                bankNumber: "",
+                branchBank: "",
+                accountNumber: "",
+              },
+              stages: [],
+              topics: [],
+              rating: 0,
+              ratingCount: 0,
+            });
+          } else {
+            userData.favorites = [];
+          }
+
+          const newUserDocRef = await addDoc(usersCollectionRef, userData);
+          userIdToUse = newUserDocRef.id;
+          userIdToUse = newUserDocRef.id;
+        }
       }
+
+      // Fetch user data
+      if (userIdToUse) {
+        const userDocRef = doc(firestore, collectionName, userIdToUse);
+        let userSnapshot = await getDoc(userDocRef);
+        if (userSnapshot.exists()) {
+          existingUser = userSnapshot.data();
+
+          // Add missing fields if needed
+          const updates = {};
+          if (userRole === "teacher") {
+            if (existingUser.pendingPayout === undefined)
+              updates.pendingPayout = 0;
+            if (existingUser.totalEarned === undefined) updates.totalEarned = 0;
+            if (!existingUser.bankDetails) {
+              updates.bankDetails = {
+                fullName: "",
+                bankNumber: "",
+                branchBank: "",
+                accountNumber: "",
+              };
+            }
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await setDoc(userDocRef, updates, { merge: true });
+            userSnapshot = await getDoc(userDocRef);
+            existingUser = userSnapshot.data();
+          }
+
+          // Store user in Redux
+          dispatch(
+            setUserInfo({
+              name: existingUser.name,
+              phone: existingUser.phone,
+              profileImage: existingUser.profileImage,
+              userId: userIdToUse,
+              defaultPaymentMethod: existingUser.defaultPaymentMethod || "",
+              isLoggedIn: true,
+              userType: userRole,
+            })
+          );
+
+          if (userRole === "teacher") {
+            dispatch(setTeacherData(existingUser));
+          } else {
+            dispatch(setFavorites(existingUser.favorites));
+          }
+
+          await fetchLessons(userIdToUse, userRole, dispatch);
+        }
+      }
+
+      // ✅ Show NameImageModal if required
+      const needsNameImage =
+        !existingUser?.name ||
+        (userRole === "teacher" && !existingUser?.profileImage);
+
+      if (needsNameImage) {
+        setShowNameImageModal(true);
+        return; // ⛔ Don't close AuthModal yet
+      }
+
+      // ✅ Everything ok, close modal
+      await registerForPushNotificationsAsync(userIdToUse, userRole);
+      onClose();
+    } catch (error) {
+      console.error("❌ Error in confirmOtp:", error);
     }
   };
 
@@ -332,6 +356,13 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
             </>
           )}
         </View>
+        <NameImageModal
+          visible={showNameImageModal}
+          onClose={() => {
+            setShowNameImageModal(false);
+            onClose(); // close auth modal too
+          }}
+        />
       </View>
     </Modal>
   );

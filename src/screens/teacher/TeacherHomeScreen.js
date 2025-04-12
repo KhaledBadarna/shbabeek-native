@@ -26,7 +26,7 @@ const TeacherHomeScreen = () => {
     profileImage,
     userId: teacherId,
   } = useSelector((state) => state.user); // ✅ Get teacher ID
-  const balance = 300;
+
   // ✅ 1️⃣ Use Firestore `onSnapshot` for Real-Time Updates
   useEffect(() => {
     if (!teacherId) return;
@@ -152,6 +152,9 @@ const TeacherHomeScreen = () => {
         <Text style={styles.subTitle}>ابدا الربح الآن!</Text>
       </View>
       <View style={{ backgroundColor: "#fff", padding: 10, borderRadius: 10 }}>
+        <View style={styles.commingLessonsCont}>
+          <Text style={styles.comingLessonsText}>الدروس القادمة:</Text>
+        </View>
         <WeeklyDateSelector
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
@@ -182,7 +185,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
+  commingLessonsCont: {
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f2f2f2",
+  },
+  comingLessonsText: {
+    textAlign: "right",
+    fontFamily: "Cairo",
+    fontWeight: "bold",
+  },
   greeting: {
     color: "#031417",
     fontSize: 16,

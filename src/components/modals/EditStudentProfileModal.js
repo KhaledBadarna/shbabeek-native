@@ -18,7 +18,6 @@ const EditStudentProfileModal = ({ visible, onClose }) => {
   const user = useSelector((state) => state.user); // Get user data from Redux
   const [newName, setNewName] = useState(user.name || "");
   const [newPhone, setNewPhone] = useState(user.phone || "");
-  console.log(user);
 
   const handleSave = async () => {
     if (!newName.trim() || !newPhone.trim()) {
