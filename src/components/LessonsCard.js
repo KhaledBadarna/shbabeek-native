@@ -8,13 +8,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import MessageModal from "./modals/MessageModal";
+
 import { useNavigation } from "@react-navigation/native";
 
 const LessonsCard = ({ lessons = [] }) => {
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [lessonMessage, setLessonMessage] = useState("");
 
   if (!lessons || lessons.length === 0) {
     return (
@@ -24,7 +22,7 @@ const LessonsCard = ({ lessons = [] }) => {
 
   return (
     <FlatList
-      contentContainerStyle={{ paddingBottom: 200, marginTop: 15 }}
+      contentContainerStyle={{ paddingBottom: 300, marginTop: 15 }}
       data={lessons}
       keyExtractor={(item) => item.id}
       showsVerticalScrollIndicator={false}
@@ -69,30 +67,9 @@ const LessonsCard = ({ lessons = [] }) => {
             >
               <Text style={styles.enterLessonButtonText}>دخول الدرس</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                setLessonMessage(item.message);
-                setModalVisible(true);
-              }}
-            >
-              <Icon
-                name="message-reply-text-outline"
-                size={25}
-                color="#333"
-                style={{ marginTop: 8 }}
-              />
-            </TouchableOpacity>
           </View>
         </View>
       )}
-      ListFooterComponent={
-        <MessageModal
-          onClose={() => setModalVisible(false)}
-          lessonMessage={lessonMessage}
-          modalVisible={modalVisible}
-        />
-      }
     />
   );
 };

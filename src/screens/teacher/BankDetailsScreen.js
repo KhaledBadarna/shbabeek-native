@@ -25,13 +25,21 @@ const BankDetailsScreen = () => {
       accountNumber,
     };
 
-    setBankDetails(updatedBankDetails); // ✅ Update state in TeacherSettingsScreen
-    setHasChanges(true); // ✅ Mark as changed
+    const isChanged =
+      updatedBankDetails.fullName !== bankDetails.fullName ||
+      updatedBankDetails.bankNumber !== bankDetails.bankNumber ||
+      updatedBankDetails.branchBank !== bankDetails.branchBank ||
+      updatedBankDetails.accountNumber !== bankDetails.accountNumber;
 
-    await AsyncStorage.setItem(
-      "bankDetails",
-      JSON.stringify(updatedBankDetails)
-    ); // ✅ Save temporarily
+    if (isChanged) {
+      setBankDetails(updatedBankDetails); // ✅ Update parent
+      setHasChanges(true); // ✅ Only mark as changed if values actually changed
+
+      await AsyncStorage.setItem(
+        "bankDetails",
+        JSON.stringify(updatedBankDetails)
+      );
+    }
   };
 
   // ✅ Save before navigating back

@@ -8,6 +8,8 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import Topics from "../../components/Topics";
 import { doc, getDoc, setDoc } from "firebase/firestore"; // Import Firestore methods
@@ -30,7 +32,6 @@ const TeacherSettingsScreen = () => {
   const teacherData = useSelector((state) => state.teacher); // ✅ Get teacher data from Redux
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [bankDetails, setBankDetails] = useState({}); // Store teacher's bio
-  const activeButton = route.params?.activeButton || "details"; // ✅ Fallback to "details"
 
   useEffect(() => {
     if (teacherData) {
@@ -109,178 +110,186 @@ const TeacherSettingsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.container}
-        >
-          <View style={styles.topicsContainer}>
-            <Topics selectedTopics={selectedTopics} onPress={handleAction} />
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, margin: 10 }}
+        contentContainerStyle={{ paddingBottom: 100 }} // ⬅️ more padding here
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Topics Section */}
+        <View style={styles.topicsContainer}>
+          <Topics selectedTopics={selectedTopics} onPress={handleAction} />
+        </View>
+
+        {/* Stages Section */}
+        <View style={styles.levelsContainer}>
+          <View style={styles.titleIconCont}>
+            <Text style={styles.title}>المراحل</Text>
+            <Icon name="school" size={25} color="#555" />
           </View>
 
-          <View style={styles.levelsContainer}>
-            <View style={styles.titleIconCont}>
-              <Text style={styles.title}>المراحل</Text>
-              <Icon name="school" size={25} color="#555" />
-            </View>
+          <Text
+            style={{
+              textAlign: "right",
+              color: "#b2b2b2",
+              fontFamily: "Cairo",
+              fontSize: 12,
+            }}
+          >
+            يمكنك اختيار عدة مراحل
+          </Text>
 
-            <Text
-              style={{
-                textAlign: "right",
-                color: "#b2b2b2",
-                fontFamily: "Cairo",
-                fontSize: 12,
-              }}
-            >
-              يمكنك اختيار عدة مراحل
-            </Text>
-            <View style={styles.buttonsContainer}>
-              {["ابتدائي", "اعدادي", "ثانوي"].map((stage, index) => {
-                const isSelected = selectedStages.includes(stage);
-
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => handleToggleStage(stage)}
-                    style={[
-                      styles.button,
-                      isSelected && { borderColor: "#00e5ff", borderWidth: 1 }, // ✅ Change border color when selected
-                    ]}
+          <View style={styles.buttonsContainer}>
+            {["ابتدائي", "اعدادي", "ثانوي"].map((stage, index) => {
+              const isSelected = selectedStages.includes(stage);
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleToggleStage(stage)}
+                  style={[
+                    styles.button,
+                    isSelected && {
+                      borderColor: "#00e5ff",
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row-reverse",
+                      alignItems: "center",
+                    }}
                   >
-                    <View
-                      style={{
-                        flexDirection: "row-reverse",
-                        alignItems: "center",
-                      }}
-                    >
-                      {/* ✅ Show checkmark icon only if selected, placed to the left of the text */}
-                      {isSelected && (
-                        <Icon
-                          name="checkbox-marked-circle"
-                          size={20}
-                          color="#00e5ff"
-                          style={{ marginLeft: 5 }}
-                        />
-                      )}
+                    {isSelected && (
+                      <Icon
+                        name="checkbox-marked-circle"
+                        size={20}
+                        color="#00e5ff"
+                        style={{ marginLeft: 5 }}
+                      />
+                    )}
+                    <Text style={styles.buttonText}>{stage}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
 
-                      <Text style={styles.buttonText}>{stage}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+        {/* Price Section */}
+        <View style={styles.priceContainer}>
+          <View style={styles.titleIconCont}>
+            <Text style={styles.title}> السعر</Text>
+            <Icon name="currency-usd" size={25} color="#555" />
           </View>
 
-          <View style={styles.priceContainer}>
-            <View style={styles.titleIconCont}>
-              <Text style={styles.title}> السعر</Text>
-              <Icon name="currency-usd" size={25} color="#555" />
-            </View>
+          <Text
+            style={{
+              textAlign: "right",
+              color: "#cdcdcd",
+              fontFamily: "Cairo",
+              fontSize: 12,
+            }}
+          >
+            السعر لكل 50 دقيقة
+          </Text>
 
-            <Text
-              style={{
-                textAlign: "right",
-                color: "#cdcdcd",
-                fontFamily: "Cairo",
-                fontSize: 12,
-              }}
-            >
-              السعر لكل 50 دقيقة
-            </Text>
-            <TextInput
-              style={styles.priceInput}
-              keyboardType="numeric"
-              value={isEditingPrice ? price : price ? `${price} ₪` : ""}
-              onChangeText={(text) => handleFieldChange("price", text)}
-              onFocus={() => setIsEditingPrice(true)} // ✅ Remove ₪ symbol
-              onBlur={() => setIsEditingPrice(false)} // ✅ Add ₪ symbol back
-              placeholder="بالشيقل"
-            />
-          </View>
-          <View style={styles.bioContainer}>
-            <View style={styles.titleIconCont}>
-              <Text style={[styles.title, { marginBottom: 10 }]}>نبذة عني</Text>
-              <Icon name="card-account-details" size={25} color="#555" />
-            </View>
+          <TextInput
+            style={styles.priceInput}
+            keyboardType="numeric"
+            value={isEditingPrice ? price : price ? `${price} ₪` : ""}
+            onChangeText={(text) => handleFieldChange("price", text)}
+            onFocus={() => setIsEditingPrice(true)}
+            onBlur={() => setIsEditingPrice(false)}
+            placeholder="بالشيقل"
+          />
+        </View>
 
-            <TouchableOpacity
-              style={styles.bioButton}
-              onPress={() =>
-                navigation.navigate("EditBioScreen", {
-                  bio,
-                  setBio,
-                  setHasChanges,
-                  hasChanges,
-                })
-              }
-            >
-              <Text style={styles.bioText} numberOfLines={1}>
-                {bio || "اضغط لإضافة نبذة عنك..."}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.bioContainer}>
-            <View style={styles.titleIconCont}>
-              <Text style={[styles.title, { marginBottom: 10 }]}>
-                حساب البنك
-              </Text>
-              <Icon name="credit-card" size={25} color="#555" />
-            </View>
-            <TouchableOpacity
-              style={styles.bankAccount}
-              onPress={() =>
-                navigation.navigate("BankDetailsScreen", {
-                  bankDetails,
-                  setBankDetails, // ✅ Pass the setter function
-                  setHasChanges,
-                  hasChanges,
-                })
-              }
-            >
-              <Icon
-                name="bank-plus"
-                size={30}
-                color="#031417"
-                style={{ marginLeft: 5 }}
-              />
-              <Text
-                style={{
-                  fontFamily: "Cairo",
-                  fontWeight: "600",
-                  color: "#031417",
-                }}
-              >
-                {bankDetails ? "تعديل الحساب" : "اضافة حساب"}
-              </Text>
-            </TouchableOpacity>
+        {/* Bio Section */}
+        <View style={styles.bioContainer}>
+          <View style={styles.titleIconCont}>
+            <Text style={[styles.title, { marginBottom: 10 }]}>نبذة عني</Text>
+            <Icon name="card-account-details" size={25} color="#555" />
           </View>
 
           <TouchableOpacity
-            style={[
-              styles.saveButton,
-              isSaving && styles.savingButton, // Apply savingButton style when saving
-              !hasChanges && styles.disabledButton, // Grey button when no changes
-            ]}
-            onPress={handleSave}
-            disabled={isSaving || !hasChanges} // Disable button when saving or no changes
+            style={styles.bioButton}
+            onPress={() =>
+              navigation.navigate("EditBioScreen", {
+                bio,
+                setBio,
+                setHasChanges,
+                hasChanges,
+              })
+            }
           >
-            <View
-              style={{ flexDirection: "row-reverse", alignItems: "center" }}
-            >
-              <Text style={styles.saveButtonText}>
-                {isSaving ? "جارٍ الحفظ..." : "حفظ"}
-              </Text>
-              <Icon
-                name="send-circle"
-                size={30}
-                color="#fff"
-                style={{ transform: [{ rotate: "180deg" }], marginRight: 10 }} // ✅ Mirroring the icon
-              />
-            </View>
+            <Text style={styles.bioText} numberOfLines={1}>
+              {bio || "اضغط لإضافة نبذة عنك..."}
+            </Text>
           </TouchableOpacity>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+        </View>
+
+        {/* Bank Details Section */}
+        <View style={styles.bioContainer}>
+          <View style={styles.titleIconCont}>
+            <Text style={[styles.title, { marginBottom: 10 }]}>حساب البنك</Text>
+            <Icon name="credit-card" size={25} color="#555" />
+          </View>
+
+          <TouchableOpacity
+            style={styles.bankAccount}
+            onPress={() =>
+              navigation.navigate("BankDetailsScreen", {
+                bankDetails,
+                setBankDetails,
+                setHasChanges,
+                hasChanges,
+              })
+            }
+          >
+            <Icon
+              name="bank-plus"
+              size={30}
+              color="#031417"
+              style={{ marginLeft: 5 }}
+            />
+            <Text
+              style={{
+                fontFamily: "Cairo",
+                fontWeight: "600",
+                color: "#031417",
+              }}
+            >
+              {bankDetails ? "تعديل الحساب" : "اضافة حساب"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* ✅ Fixed Save Button */}
+      <View style={styles.fixedBottomButton}>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            isSaving && styles.savingButton,
+            !hasChanges && styles.disabledButton,
+          ]}
+          onPress={handleSave}
+          disabled={isSaving || !hasChanges}
+        >
+          <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
+            <Text style={styles.saveButtonText}>
+              {isSaving ? "جارٍ الحفظ..." : "حفظ"}
+            </Text>
+            <Icon
+              name="send-circle"
+              size={30}
+              color="#fff"
+              style={{ transform: [{ rotate: "180deg" }], marginRight: 10 }}
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -308,7 +317,7 @@ const styles = StyleSheet.create({
   },
   levelsContainer: {
     backgroundColor: "#ffffff",
-    marginTop: 10,
+    marginTop: 5,
     borderRadius: 10,
     padding: 15,
   },
@@ -322,7 +331,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     marginHorizontal: 5,
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 10,
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -340,7 +349,7 @@ const styles = StyleSheet.create({
   priceContainer: {
     backgroundColor: "#fff",
     borderRadius: 10,
-    marginVertical: 10,
+    marginVertical: 5,
     padding: 15,
   },
 
@@ -370,11 +379,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Cairo",
   },
+  fixedBottomButton: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopWidth: 1,
+    borderColor: "#f1f1f1",
+    paddingBottom: 40,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
   bioContainer: {
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 5,
   },
 
   bioButton: {

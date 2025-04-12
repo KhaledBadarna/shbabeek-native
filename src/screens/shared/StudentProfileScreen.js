@@ -197,7 +197,7 @@ const StudentProfileScreen = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.teachersButton, { backgroundColor: "#b0edf7" }]}
+            style={[styles.teachersButton, { backgroundColor: "#00ddff" }]}
             onPress={() => navigation.navigate("TeacherSettingsScreen")}
           >
             <Icon name="badge-account-horizontal" size={24} color="#031417" />
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     alignItems: "center",
-    backgroundColor: "#cff7b0",
+    backgroundColor: "#0efa7c",
     width: "48%",
   },
   teachersBtnContainer: {
