@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     borderRightWidth: 3.5,
     paddingHorizontal: 20,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
   },
   detailRow: {
     flexDirection: "row",

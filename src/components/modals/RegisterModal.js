@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   topCloseButtonText: {
     fontSize: 20,
-    color: "#00adf0",
+    color: "#009dff",
     fontWeight: "semibold",
   },
   title: {

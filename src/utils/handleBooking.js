@@ -11,6 +11,7 @@ import {
 import { firestore } from "../firebase";
 // import { uploadFile } from "./uploadFile";
 import { addLesson } from "../redux/slices/lessonsSlice"; // ✅ Import Redux action
+import { checkStudentBookingConflict } from "./checkBookingConflict";
 
 export const handleBooking = async (
   teacher,
@@ -24,6 +25,19 @@ export const handleBooking = async (
   dispatch
 ) => {
   try {
+    // 🧠 ⛔️ Check for conflicts BEFORE doing anything else
+    const conflict = await checkStudentBookingConflict(
+      studentId,
+      selectedDate,
+      selectedSlot.startTime,
+      selectedSlot.endTime
+    );
+
+    if (conflict) {
+      console.log("⛔️ Time conflict found — blocking booking");
+      return { success: false, reason: "conflict" };
+    }
+    console.log("🔥 Booking conflict found?", conflict);
     // Upload file if available
     const fileUrl = file ? await uploadFile(file) : null;
 
@@ -119,4 +133,5 @@ export const handleBooking = async (
     console.error("❌ Error booking lesson:", error);
     throw new Error("Error booking lesson, please try again.");
   }
+  return { success: true };
 };

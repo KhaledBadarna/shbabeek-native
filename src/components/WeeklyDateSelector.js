@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   selectedDayNumber: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
   },
   dayNumber: {
     fontSize: 15,

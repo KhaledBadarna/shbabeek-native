@@ -22,7 +22,31 @@ const ChatsListScreen = () => {
   const { userId } = useSelector((state) => state.user); // Get logged-in user
   const [chats, setChats] = useState([]);
   const navigation = useNavigation();
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp?.seconds) return "";
+    const messageDate = new Date(timestamp.seconds * 1000);
+    const now = new Date();
 
+    const isToday = messageDate.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = messageDate.toDateString() === yesterday.toDateString();
+
+    if (isToday) {
+      return messageDate.toLocaleTimeString("he-EG", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } else if (isYesterday) {
+      return "أمس";
+    } else {
+      return messageDate.toLocaleDateString("ar-EG", {
+        day: "2-digit",
+        month: "short",
+      });
+    }
+  };
   useEffect(() => {
     if (!userId) return;
 
@@ -102,13 +126,7 @@ const ChatsListScreen = () => {
 
             {item.lastMessageTime && (
               <Text style={styles.timeText}>
-                {new Date(
-                  item.lastMessageTime.seconds * 1000
-                ).toLocaleTimeString("he-EG", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false, // 24-hour format (change to true for 12-hour)
-                })}
+                {formatTimestamp(item.lastMessageTime)}
               </Text>
             )}
           </TouchableOpacity>
@@ -137,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
     borderWidth: 1.5,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
   },
   textContainer: { flex: 1 },
   username: {

@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   transferButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     width: "100%",
     paddingVertical: 8,
     borderRadius: 8,
@@ -241,12 +241,12 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 40,
     borderWidth: 2,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
     borderWidth: 2,
   },
   subTitle: {
     fontSize: 13,
-    color: "#00e5ff",
+    color: "#009dff",
     marginBottom: 20,
     textAlign: "right",
     writingDirection: "rtl",

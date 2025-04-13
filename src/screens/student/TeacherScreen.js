@@ -203,7 +203,7 @@
 //                     }}
 //                     name="play-circle"
 //                     size={80}
-//                     color="#00adf0"
+//                     color="#009dff"
 //                   />
 //                 </TouchableOpacity>
 //               )}

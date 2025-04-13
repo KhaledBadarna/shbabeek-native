@@ -73,6 +73,7 @@ const TeacherBookingScreen = ({ route, navigation }) => {
         onSelectDate={setSelectedDate}
         availableSlots={availableSlots}
         type="availability"
+        startFromTomorrow={true} // ⛔️ Skip today on booking
       />
 
       <View style={styles.slotsContainer}>

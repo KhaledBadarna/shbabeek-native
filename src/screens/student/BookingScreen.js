@@ -45,7 +45,7 @@ const BookingScreen = ({ route }) => {
         return;
       }
 
-      await handleBooking(
+      const result = await handleBooking(
         teacher,
         teacherId,
         selectedSlot,
@@ -53,14 +53,22 @@ const BookingScreen = ({ route }) => {
         studentId,
         message,
         fileAttached,
-        selectedTopic, // Pass the selected topic to the booking
+        selectedTopic,
         dispatch
       );
 
-      // Show success message
+      if (result.success === false && result.reason === "conflict") {
+        alert(
+          "⚠️ لقد قمت بالفعل بحجز درس في هذا الوقت. الرجاء اختيار وقت آخر."
+        );
+        return;
+      }
+
+      // ✅ All good
       setShowSuccessMessage(true);
     } catch (error) {
-      alert("Error booking lesson. Please try again.");
+      console.error("❌ Unexpected error:", error);
+      alert("حدث خطأ أثناء حجز الدرس. حاول مرة أخرى.");
     }
   };
 
@@ -94,7 +102,7 @@ const BookingScreen = ({ route }) => {
       >
         {showSuccessMessage ? (
           <View style={styles.successMessageContainer}>
-            <Icon name="checkmark-circle" size={50} color="#009dff" />
+            <Icon name="check-decagram" size={50} color="#009dff" />
             <Text style={styles.successMessageText}>
               تم حجز الدرس بنجاح! الرجاء انتظار موافقة المعلم على الطلب
             </Text>
@@ -324,7 +332,7 @@ const BookingScreen = ({ route }) => {
                 onPress={handleAttachFile}
                 style={styles.attachFileButton}
               >
-                <Icon name="attachment" size={24} color="#00adf0" />
+                <Icon name="attachment" size={24} color="#009dff" />
                 <Text style={styles.attachFileText}>
                   {fileAttached
                     ? `ملف مرفق: ${fileAttached.name}`
@@ -410,7 +418,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   selectedTopicButton: {
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
     color: "#031417",
   },
   buttonText: {
@@ -423,10 +431,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
     padding: 10,
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
   },
   sendButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     borderRadius: 10,
     padding: 10,
   },
@@ -435,10 +443,10 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
   },
   topicButtonText: { fontFamily: "Cairo", fontSize: 13, color: "#8b8a8a" },
-  selectedTopicButtonText: { color: "#00e5ff", fontWeight: "500" },
+  selectedTopicButtonText: { color: "#009dff", fontWeight: "500" },
   paymentMethodButton: {
     borderWidth: 1.5,
     borderColor: "#e5eaed",
@@ -481,6 +489,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  successMessageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  successMessageText: { fontFamily: "Cairo", marginTop: 10 },
 });
 
 export default BookingScreen;

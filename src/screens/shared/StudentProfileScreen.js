@@ -290,13 +290,13 @@ const styles = StyleSheet.create({
     borderRadius: 50, // Make the image circular
     backgroundColor: "#ddd", // Placeholder background
     borderWidth: 2,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
   },
   cameraIcon: {
     position: "absolute",
     bottom: 0,
     right: 5,
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     borderRadius: 20,
     padding: 5,
   },

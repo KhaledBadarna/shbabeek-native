@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     color: "#031417",
     textAlign: "right", // Align name to the left
     fontFamily: "Cairo",
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     padding: 10,
     borderRadius: 10,
   },

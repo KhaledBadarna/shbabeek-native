@@ -50,7 +50,7 @@ const TeacherInfoScreen = ({ route, navigation }) => {
               <Icon
                 name="play-circle"
                 size={80}
-                color="#00adf0"
+                color="#009dff"
                 style={styles.playIcon}
               />
             </TouchableOpacity>
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bookLessonButton: {
-    backgroundColor: "#00adf0",
+    backgroundColor: "#009dff",
     padding: 8,
     borderRadius: 10,
     width: "80%",

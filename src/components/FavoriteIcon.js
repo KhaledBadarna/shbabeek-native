@@ -66,7 +66,7 @@ const FavoriteIcon = ({ teacherId }) => {
         <Icon
           name={isFavorite ? "bookmark" : "bookmark-outline"}
           size={30}
-          color={isFavorite ? "#00e5ff" : "#031417"}
+          color={isFavorite ? "#009dff" : "#031417"}
         />
       </TouchableOpacity>
 

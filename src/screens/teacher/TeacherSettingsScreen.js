@@ -154,7 +154,7 @@ const TeacherSettingsScreen = () => {
                   style={[
                     styles.button,
                     isSelected && {
-                      borderColor: "#00e5ff",
+                      borderColor: "#009dff",
                       borderWidth: 1,
                     },
                   ]}
@@ -169,7 +169,7 @@ const TeacherSettingsScreen = () => {
                       <Icon
                         name="checkbox-marked-circle"
                         size={20}
-                        color="#00e5ff"
+                        color="#009dff"
                         style={{ marginLeft: 5 }}
                       />
                     )}
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     borderColor: "#f1f1f1",
   },
   selectedButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
   },
   buttonText: {
     fontSize: 13,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   saveButton: {
-    backgroundColor: "#00e5ff", // Grey color when disabled
+    backgroundColor: "#009dff", // Grey color when disabled
     padding: 10,
     borderRadius: 10,
     alignItems: "center",
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 10,
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
   },
 });
 

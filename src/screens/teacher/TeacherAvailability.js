@@ -214,7 +214,7 @@ const TeacherAvailability = () => {
             style={[
               styles.saveButton,
               {
-                backgroundColor: hasChanges ? "#00e5ff" : "#898989",
+                backgroundColor: hasChanges ? "#009dff" : "#898989",
                 opacity: hasChanges ? 1 : 0.5,
               },
             ]}
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     borderColor: "red",
   },
   addButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     borderRadius: 5,
     padding: 10,
     marginHorizontal: 10,

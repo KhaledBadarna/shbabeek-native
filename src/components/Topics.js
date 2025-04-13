@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
   },
   selectedTopic: {
-    backgroundColor: "#00e5ff", // The background color when the topic is selected
+    backgroundColor: "#009dff", // The background color when the topic is selected
   },
   topicText: {
     fontSize: 14,

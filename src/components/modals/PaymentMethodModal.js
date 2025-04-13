@@ -139,7 +139,7 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
           <TouchableOpacity
             style={[
               styles.saveButton,
-              { backgroundColor: selectedMethod ? "#00e5ff" : "#ccc" },
+              { backgroundColor: selectedMethod ? "#009dff" : "#ccc" },
             ]}
             disabled={!selectedMethod}
             onPress={savePaymentMethod}
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   selectedOption: {
-    borderColor: "#00e5ff",
+    borderColor: "#009dff",
     backgroundColor: "#E7FAFC",
   },
   paymentIcon: {

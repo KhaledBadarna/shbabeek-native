@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",
-    color: "#00adf0",
+    color: "#009dff",
     fontFamily: "Cairo",
   },
   input: {
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   saveButton: {
-    backgroundColor: "#00adf0",
+    backgroundColor: "#009dff",
     padding: 10,
     borderRadius: 8,
     flex: 1,

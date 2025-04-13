@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   closeText: {
     fontSize: 20,
-    color: "#00e5ff",
+    color: "#009dff",
     fontWeight: "bold",
   },
   title: {
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     color: "#031417",
   },
   confirmButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     paddingVertical: 12,
     paddingHorizontal: 50,
     borderRadius: 10,
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   roleToggleText: {
-    color: "#00e5ff",
+    color: "#009dff",
     fontSize: 15,
     textAlign: "center",
     fontFamily: "Cairo",

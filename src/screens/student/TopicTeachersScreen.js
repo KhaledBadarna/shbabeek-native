@@ -132,7 +132,7 @@ const TopicTeachersScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00adf0" />
+        <ActivityIndicator size="large" color="#009dff" />
       </View>
     );
   }
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   activeFilter: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,

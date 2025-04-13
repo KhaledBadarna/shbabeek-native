@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     alignSelf: "flex-end",
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
   },
   theirMessage: {
     alignSelf: "flex-start",
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   sendButton: {
-    backgroundColor: "#00e5ff",
+    backgroundColor: "#009dff",
     padding: 10,
     borderRadius: 20,
     marginRight: 10,
