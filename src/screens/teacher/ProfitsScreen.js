@@ -12,22 +12,19 @@ const ProfitsScreen = () => {
     <View style={styles.container}>
       <TouchableOpacity
         // 🧠 In ProfitsScreen.js
-        onPress={() =>
-          navigation.navigate("CompletedLessonsScreen", {
-            onTotalCalculated: (total) => {
-              console.log("📊 total from child:", total);
-              setEarnedFromChild(total); // 👈 use it directly here
-            },
-          })
-        }
+        onPress={() => navigation.navigate("CompletedLessonsScreen")}
         style={styles.card}
       >
         <Icon name="cash" size={40} color="#031417" style={styles.icon} />
         <Text style={styles.label}>الارباح الكلية</Text>
         <Text style={styles.amount}>{earnedFromChild} ₪</Text>
       </TouchableOpacity>
-
-      <View style={styles.card}>
+      <TouchableOpacity
+        onPress={
+          () => navigation.navigate("PendingPayoutLessonsScreen") // 👈 push to a new screen
+        }
+        style={styles.card}
+      >
         <Icon
           name="clock-outline"
           size={40}
@@ -36,7 +33,7 @@ const ProfitsScreen = () => {
         />
         <Text style={styles.label}>المبلغ قيد التحويل</Text>
         <Text style={styles.amount}>{pendingPayout} ₪</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -17,6 +17,8 @@ import ProfitsScreen from "./src/screens/teacher/ProfitsScreen";
 import LessonCallScreen from "./src/screens/shared/LessonCallScreen";
 import ChatScreen from "./src/screens/shared/ChatScreen";
 import CompletedLessonsScreen from "./src/screens/teacher/CompletedLessonsScreen";
+import PendingPayoutLessonsScreen from "./src/screens/teacher/PendingPayoutLessonsScreen";
+
 import * as Notifications from "expo-notifications";
 import AppLoading from "expo-app-loading";
 import { useFonts } from "expo-font";
@@ -174,6 +176,11 @@ export default function App() {
           <Stack.Screen
             name="CompletedLessonsScreen"
             component={CompletedLessonsScreen}
+            options={{ title: "الدروس المدفوعة" }}
+          />
+          <Stack.Screen
+            name="PendingPayoutLessonsScreen"
+            component={PendingPayoutLessonsScreen}
             options={{ title: "الدروس المكتملة" }}
           />
         </Stack.Navigator>

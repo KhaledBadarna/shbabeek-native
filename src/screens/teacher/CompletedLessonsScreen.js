@@ -31,32 +31,27 @@ const CompletedLessonsScreen = () => {
   const [lastDoc, setLastDoc] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
-
   const fetchLessons = useCallback(
     async (loadMore = false, startAfterDoc = null) => {
       if (loadMore) setLoadingMore(true);
 
-      let q = query(
+      // Base query with filters and ordering
+      let baseQuery = query(
         collection(firestore, "lessons"),
         where("teacherId", "==", userId),
         where("isComplete", "==", true),
+        where("isPaidOut", "==", true),
         orderBy("selectedDate", "desc"),
-        orderBy("startTime", "asc"),
-        limit(PAGE_SIZE)
+        orderBy("startTime", "asc")
       );
 
-      if (loadMore && startAfterDoc) {
-        q = query(
-          collection(firestore, "lessons"),
-          where("teacherId", "==", userId),
-          where("isComplete", "==", true),
-          orderBy("selectedDate", "desc"),
-          orderBy("startTime", "asc"),
-          startAfter(startAfterDoc),
-          limit(PAGE_SIZE)
-        );
-      }
+      // Add pagination if needed
+      const q =
+        loadMore && startAfterDoc
+          ? query(baseQuery, startAfter(startAfterDoc), limit(PAGE_SIZE))
+          : query(baseQuery, limit(PAGE_SIZE));
 
+      // Fetch the docs
       const snapshot = await getDocs(q);
       const newLessons = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -67,6 +62,8 @@ const CompletedLessonsScreen = () => {
         setLessons((prev) => [...prev, ...newLessons]);
       } else {
         setLessons(newLessons);
+
+        // Calculate and pass total earned
         const total = newLessons.reduce(
           (acc, curr) => acc + Number(curr.paidAmount || 0),
           0
@@ -74,6 +71,7 @@ const CompletedLessonsScreen = () => {
         onTotalCalculated?.(total);
       }
 
+      // Pagination state updates
       if (snapshot.docs.length < PAGE_SIZE) setAllLoaded(true);
       setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
       setLoadingMore(false);
@@ -107,7 +105,7 @@ const CompletedLessonsScreen = () => {
         }}
       >
         <Icon name="calendar-month" size={30} color="#031417" />
-        <Icon name="cash-fast" size={30} color="#031417" />
+        <Icon name="cash-check" size={30} color="#031417" />
       </View>
 
       <FlatList
