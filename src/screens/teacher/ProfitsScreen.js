@@ -15,7 +15,7 @@ const ProfitsScreen = () => {
         onPress={() => navigation.navigate("CompletedLessonsScreen")}
         style={styles.card}
       >
-        <Icon name="cash" size={40} color="#031417" style={styles.icon} />
+        <Icon name="cash-check" size={40} color="#031417" style={styles.icon} />
         <Text style={styles.label}>الارباح الكلية</Text>
         <Text style={styles.amount}>{earnedFromChild} ₪</Text>
       </TouchableOpacity>
@@ -25,12 +25,7 @@ const ProfitsScreen = () => {
         }
         style={styles.card}
       >
-        <Icon
-          name="clock-outline"
-          size={40}
-          color="#031417"
-          style={styles.icon}
-        />
+        <Icon name="cash-fast" size={40} color="#031417" style={styles.icon} />
         <Text style={styles.label}>المبلغ قيد التحويل</Text>
         <Text style={styles.amount}>{pendingPayout} ₪</Text>
       </TouchableOpacity>
