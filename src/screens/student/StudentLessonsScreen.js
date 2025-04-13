@@ -37,7 +37,15 @@ const StudentLessonsScreen = () => {
           type="lessons"
         />
 
-        <LessonsCard lessons={lessonsForDate} />
+        <LessonsCard
+          lessons={[...lessonsForDate].sort((a, b) => {
+            const toMinutes = (t) => {
+              const [h, m] = t.split(":").map(Number);
+              return h * 60 + m;
+            };
+            return toMinutes(a.startTime) - toMinutes(b.startTime);
+          })}
+        />
       </View>
     </View>
   );

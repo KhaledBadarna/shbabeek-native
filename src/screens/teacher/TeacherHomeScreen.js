@@ -163,9 +163,15 @@ const TeacherHomeScreen = () => {
         />
         {/* List of lessons */}
         <LessonsCard
-          lessons={lessons.filter(
-            (lesson) => lesson.selectedDate === selectedDate
-          )}
+          lessons={lessons
+            .filter((lesson) => lesson.selectedDate === selectedDate)
+            .sort((a, b) => {
+              const toMinutes = (time) => {
+                const [h, m] = time.split(":").map(Number);
+                return h * 60 + m;
+              };
+              return toMinutes(a.startTime) - toMinutes(b.startTime);
+            })}
         />
       </View>
     </View>

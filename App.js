@@ -16,7 +16,7 @@ import TeacherSettingsScreen from "./src/screens/teacher/TeacherSettingsScreen";
 import ProfitsScreen from "./src/screens/teacher/ProfitsScreen";
 import LessonCallScreen from "./src/screens/shared/LessonCallScreen";
 import ChatScreen from "./src/screens/shared/ChatScreen";
-
+import CompletedLessonsScreen from "./src/screens/teacher/CompletedLessonsScreen";
 import * as Notifications from "expo-notifications";
 import AppLoading from "expo-app-loading";
 import { useFonts } from "expo-font";
@@ -170,6 +170,11 @@ export default function App() {
             name="LessonCallScreen"
             component={LessonCallScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CompletedLessonsScreen"
+            component={CompletedLessonsScreen}
+            options={{ title: "الدروس المكتملة" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

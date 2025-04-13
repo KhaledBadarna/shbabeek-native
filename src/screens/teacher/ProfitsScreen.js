@@ -1,18 +1,31 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const ProfitsScreen = () => {
   const { totalEarned, pendingPayout } = useSelector((state) => state.teacher);
-
+  const [earnedFromChild, setEarnedFromChild] = useState(0);
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <TouchableOpacity
+        // 🧠 In ProfitsScreen.js
+        onPress={() =>
+          navigation.navigate("CompletedLessonsScreen", {
+            onTotalCalculated: (total) => {
+              console.log("📊 total from child:", total);
+              setEarnedFromChild(total); // 👈 use it directly here
+            },
+          })
+        }
+        style={styles.card}
+      >
         <Icon name="cash" size={40} color="#031417" style={styles.icon} />
         <Text style={styles.label}>الارباح الكلية</Text>
-        <Text style={styles.amount}>{totalEarned} ₪</Text>
-      </View>
+        <Text style={styles.amount}>{earnedFromChild} ₪</Text>
+      </TouchableOpacity>
 
       <View style={styles.card}>
         <Icon
