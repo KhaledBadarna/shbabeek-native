@@ -10,8 +10,7 @@ import StudentLessonsScreen from "../screens/student/StudentLessonsScreen";
 import { StatusBar } from "react-native";
 import AuthModal from "../components/modals/AuthModal";
 
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
+import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native";
 import {
   collection,
