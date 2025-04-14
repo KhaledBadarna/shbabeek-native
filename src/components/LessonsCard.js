@@ -54,13 +54,16 @@ const LessonsCard = ({ lessons = [] }) => {
               </Text>
               <Icon name="clock-time-ten-outline" size={20} color="#031417" />
             </View>
-
+            {console.log(item)}
             <TouchableOpacity
               style={styles.enterLessonButton}
               onPress={() =>
                 navigation.navigate("LessonCallScreen", {
                   roomName: item.id,
-                  userName: item.oppositeUser?.name,
+                  oppositeUser: item.oppositeUser?.name,
+                  lessonId: item.id,
+                  teacherId: item.teacherId,
+                  paidAmount: item.paidAmount,
                 })
               }
             >
