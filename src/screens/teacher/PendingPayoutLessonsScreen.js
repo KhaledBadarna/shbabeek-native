@@ -15,8 +15,8 @@ const PendingPayoutLessonsScreen = () => {
         const q = query(
           collection(firestore, "lessons"),
           where("teacherId", "==", userId),
-          where("isComplete", "==", true),
-          where("isPaidOut", "==", false),
+          where("isLessonCompleted", "==", true),
+          where("isTeacherPaidOut", "==", false),
           orderBy("selectedDate", "desc"),
           orderBy("startTime", "asc")
         );

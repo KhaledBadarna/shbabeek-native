@@ -11,6 +11,7 @@ const initialState = {
   pendingPayout: 0,
   totalEarned: 0,
   profileImage: "", // optional if you want it here
+  lessonsCount: 0,
 };
 
 const teacherSlice = createSlice({

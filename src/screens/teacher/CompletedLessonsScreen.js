@@ -39,8 +39,8 @@ const CompletedLessonsScreen = () => {
       let baseQuery = query(
         collection(firestore, "lessons"),
         where("teacherId", "==", userId),
-        where("isComplete", "==", true),
-        where("isPaidOut", "==", true),
+        where("isLessonCompleted", "==", true),
+        where("isTeacherPaidOut", "==", true),
         orderBy("selectedDate", "desc"),
         orderBy("startTime", "asc")
       );

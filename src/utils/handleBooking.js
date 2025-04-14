@@ -52,10 +52,10 @@ export const handleBooking = async (
       endTime: selectedSlot.endTime,
       message,
       fileUrl,
-      isComplete: false, // ✅ Track completion status
+      isLessonCompleted: false, // ✅ Track completion status
       createdAt: serverTimestamp(),
       paidAmount: teacher.pricePerHour,
-      isPaidOut: false,
+      isTeacherPaidOut: false,
     };
 
     // ✅ **Step 1: Add lesson to Firestore**

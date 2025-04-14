@@ -185,7 +185,7 @@ const StudentProfileScreen = () => {
             style={styles.teachersButton}
             onPress={() => navigation.navigate("ProfitsScreen")}
           >
-            <Icon name="finance" size={24} color="#031417" />
+            <Icon name="finance" size={24} color="#032414" />
             <Text
               style={{
                 color: "#031417",
@@ -197,10 +197,17 @@ const StudentProfileScreen = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.teachersButton, { backgroundColor: "#00ddff" }]}
+            style={[
+              styles.teachersButton,
+              {
+                backgroundColor: "#ffffff",
+                borderLeftWidth: 1,
+                borderLeftColor: "#dedede",
+              },
+            ]}
             onPress={() => navigation.navigate("TeacherSettingsScreen")}
           >
-            <Icon name="badge-account-horizontal" size={24} color="#031417" />
+            <Icon name="badge-account-horizontal" size={24} color="#1f2121" />
             <Text
               style={{
                 color: "#031417",
@@ -339,10 +346,9 @@ const styles = StyleSheet.create({
   icons: { backgroundColor: "#ebebeb", borderRadius: 10, padding: 5 },
   teachersButton: {
     backgroundColor: "#ffffff",
-    borderRadius: 5,
     padding: 10,
     alignItems: "center",
-    backgroundColor: "#0efad3",
+    backgroundColor: "#ffffff",
     width: "48%",
   },
   teachersBtnContainer: {

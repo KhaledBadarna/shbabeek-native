@@ -119,6 +119,7 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
               topics: [],
               rating: 0,
               ratingCount: 0,
+              lessonsCount: 0,
             });
           } else {
             userData.favorites = [];

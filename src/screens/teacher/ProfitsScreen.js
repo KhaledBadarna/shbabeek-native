@@ -6,7 +6,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 const ProfitsScreen = () => {
   const { totalEarned, pendingPayout } = useSelector((state) => state.teacher);
-  const [earnedFromChild, setEarnedFromChild] = useState(0);
+
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
@@ -17,7 +17,7 @@ const ProfitsScreen = () => {
       >
         <Icon name="cash-check" size={40} color="#031417" style={styles.icon} />
         <Text style={styles.label}>الارباح الكلية</Text>
-        <Text style={styles.amount}>{earnedFromChild} ₪</Text>
+        <Text style={styles.amount}>{totalEarned} ₪</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={

@@ -87,7 +87,7 @@ const TeacherInfoScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>عدد الدروس</Text>
-            <Text style={styles.infoValue}>1k</Text>
+            <Text style={styles.infoValue}>{teacher.lessonsCount}</Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>لكل 50 دقيقة</Text>
