@@ -1,3 +1,5 @@
+import { enableScreens } from "react-native-screens";
+enableScreens(); // ✅ Fixes RNSScreen error
 import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -20,7 +22,7 @@ import CompletedLessonsScreen from "./src/screens/teacher/CompletedLessonsScreen
 import PendingPayoutLessonsScreen from "./src/screens/teacher/PendingPayoutLessonsScreen";
 
 import * as Notifications from "expo-notifications";
-import AppLoading from "expo-app-loading";
+import { View, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
 import { Cairo_400Regular, Cairo_700Bold } from "@expo-google-fonts/cairo";
 
@@ -70,7 +72,11 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (

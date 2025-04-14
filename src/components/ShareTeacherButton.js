@@ -1,24 +1,18 @@
 import React from "react";
-import { TouchableOpacity, Alert } from "react-native";
-import { Sharing } from "expo-sharing";
+import { TouchableOpacity, Alert, Share } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const ShareTeacherButton = ({ teacherId }) => {
-  const teacherProfileUrl = `https://shbabeek.com/teacher/${teacherId}`; // Web fallback
+  const teacherProfileUrl = `https://shbabeek.com/teacher/${teacherId}`;
 
   const handleShare = async () => {
     try {
-      // Check if sharing is available
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(teacherProfileUrl, {
-          dialogTitle: "Share this teacher on Shbabeek!",
-          mimeType: "text/plain",
-        });
-      } else {
-        Alert.alert("Sharing is not available on this device");
-      }
+      await Share.share({
+        message: `شوف المعلم على Shbabeek:\n${teacherProfileUrl}`,
+      });
     } catch (error) {
       console.error("Error sharing:", error);
+      Alert.alert("حدث خطأ أثناء المشاركة");
     }
   };
 
