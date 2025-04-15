@@ -1,11 +1,8 @@
-import { enableScreens } from "react-native-screens";
-enableScreens(); // ✅ Fixes RNSScreen error
 import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Provider } from "react-redux";
 import store from "./src/redux/store";
-
 import BottomTabNavigator from "./src/components/BottomTabNavigator";
 import TeacherInfoScreen from "./src/screens/student/TeacherInfoScreen";
 import TopicTeachersScreen from "./src/screens/student/TopicTeachersScreen";

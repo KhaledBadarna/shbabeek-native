@@ -10,6 +10,8 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+
 import { useSelector, useDispatch } from "react-redux";
 import { firestore } from "../firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
@@ -18,8 +20,7 @@ import { setTeacherData } from "../redux/slices/teacherSlice";
 
 const NameImageModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
-  const { userId, userType: role } = useSelector((state) => state.user); // student | teacher
-
+  const { userId, userType: role } = useSelector((state) => state.user);
   const [name, setName] = useState("");
   const [imageUri, setImageUri] = useState(null);
 
@@ -39,8 +40,8 @@ const NameImageModal = ({ visible, onClose }) => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.6,
+      quality: 0.5,
+      base64: false,
     });
 
     if (!result.canceled) {
@@ -62,7 +63,6 @@ const NameImageModal = ({ visible, onClose }) => {
     try {
       const collectionName = role === "teacher" ? "teachers" : "students";
       const userRef = doc(firestore, collectionName, userId);
-
       const data = { name };
       if (role === "teacher" && imageUri) {
         data.profileImage = imageUri;
@@ -70,11 +70,16 @@ const NameImageModal = ({ visible, onClose }) => {
 
       await updateDoc(userRef, data);
 
-      // ✅ Dispatch both name and profileImage to Redux
+      const formatName = (fullName) => {
+        const parts = fullName.trim().split(" ");
+        if (parts.length === 1) return parts[0];
+        return `${parts[0]} ${parts[1][0]}.`;
+      };
+
       dispatch(
         setUserInfo({
-          name,
-          profileImage: imageUri || "", // ensure this field is set
+          name: formatName(name),
+          profileImage: imageUri || "",
         })
       );
 
@@ -90,26 +95,35 @@ const NameImageModal = ({ visible, onClose }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View style={styles.card}>
           <Text style={styles.title}>أدخل معلوماتك</Text>
+
+          <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.image} />
+            ) : (
+              <View style={styles.placeholderContainer}>
+                <Icon name="account-circle" size={80} color="#ccc" />
+                <Icon
+                  name="camera"
+                  size={30}
+                  color="#009dff"
+                  style={styles.cameraIcon}
+                />
+              </View>
+            )}
+          </TouchableOpacity>
 
           <TextInput
             style={styles.input}
             placeholder="الاسم الكامل"
+            placeholderTextColor="#aaa"
             value={name}
             onChangeText={setName}
             textAlign="right"
           />
-
-          <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.image} />
-            ) : (
-              <Text style={styles.imageText}>اختر صورة (إجباري للمعلمين)</Text>
-            )}
-          </TouchableOpacity>
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>حفظ</Text>
@@ -123,60 +137,73 @@ const NameImageModal = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
   },
-  container: {
+  card: {
     width: "90%",
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 20,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
   },
   title: {
-    fontFamily: "Cairo",
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
+    fontFamily: "Cairo",
     marginBottom: 20,
     color: "#031417",
   },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
-    fontFamily: "Cairo",
-  },
   imagePicker: {
-    width: 100,
-    height: 100,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     overflow: "hidden",
+    marginBottom: 20,
+    position: "relative",
   },
   image: {
     width: "100%",
     height: "100%",
   },
-  imageText: {
-    fontSize: 12,
-    color: "#888",
-    fontFamily: "Cairo",
-    textAlign: "center",
+  placeholderContainer: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+  },
+  cameraIcon: {
+    position: "absolute",
+    bottom: 60,
+    right: 5,
+    borderRadius: 20,
     padding: 5,
+  },
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 20,
+    fontFamily: "Cairo",
+    color: "#031417",
   },
   saveButton: {
     backgroundColor: "#009dff",
-    paddingHorizontal: 30,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
   },
   saveButtonText: {
     color: "#fff",

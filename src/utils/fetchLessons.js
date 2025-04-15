@@ -20,7 +20,6 @@ const fetchLessons = async (userType, userId, dispatch) => {
     const bookingDocSnapshot = await getDoc(bookingDocRef);
 
     if (!bookingDocSnapshot.exists()) {
-      console.warn("⚠️ No booking document found for user");
       dispatch(setLessons([])); // ✅ Reset lessons if none exist
       return;
     }
