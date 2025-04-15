@@ -166,7 +166,7 @@ const StudentProfileScreen = () => {
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
-            <Icon name="person-circle-outline" size={100} color="#555" />
+            <Icon name="account-circle-outline" size={100} color="#555" />
           )}
 
           {/* ✅ Fixed Camera Icon - Now calls pickImage */}

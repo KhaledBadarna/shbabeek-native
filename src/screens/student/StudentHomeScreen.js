@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 13,
-    color: "#1c1d1d",
+    color: "#009dff",
     marginBottom: 20,
     textAlign: "right",
     writingDirection: "rtl",
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#009dff",
   },
   noFavoritesText: {
     fontSize: 16,
