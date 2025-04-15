@@ -118,6 +118,13 @@ const StudentHomeScreen = ({ navigation }) => {
             borderRadius: 20,
             borderWidth: 1.5,
             borderColor: "#f1f1f1",
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowOffset: { width: 0, height: 2 },
+            shadowRadius: 4,
+            elevation: 3,
+            paddingHorizontal: 40,
+            margin: 5,
           }}
         />
       </View>
@@ -180,7 +187,7 @@ const StudentHomeScreen = ({ navigation }) => {
           <View style={styles.teachersContainer}>
             <Text style={styles.sectionTitle}>المعلمين المفضلين</Text>
 
-            {favorites.length === 0 && (
+            {favorites.length === 0 ? (
               <View style={styles.noFavoritesContainer}>
                 <Image
                   source={require("../../assets/noFav.png")}
@@ -190,16 +197,19 @@ const StudentHomeScreen = ({ navigation }) => {
                   لا يوجد معلمين مفضلين
                 </Text>
               </View>
+            ) : (
+              <FlatList
+                horizontal
+                data={teachersData}
+                keyExtractor={(item, index) => item.id || index.toString()}
+                renderItem={renderTeacher}
+                showsHorizontalScrollIndicator={false}
+                // contentContainerStyle={{ gap: -20 }}
+              />
             )}
           </View>
         </>
       }
-      data={favorites.length > 0 ? teachersData : []} // ✅ Ensure FlatList doesn't render empty when no favorites
-      renderItem={renderTeacher}
-      keyExtractor={(item, index) => item.id || index.toString()}
-      horizontal={false} // ✅ Vertical list
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 20 }}
     />
   );
 };
@@ -262,12 +272,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e4e4e4",
     margin: 5,
-    padding: 10,
+    padding: 5,
     backgroundColor: "#fff",
     borderRadius: 10, // ✅ Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 3,
 
     // ✅ Shadow for Android
@@ -288,10 +298,7 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 20,
   },
-  teacherCardWrapper: {
-    marginRight: 3,
-    width: 200, // Fixed width in pixels
-  },
+
   noFavoritesContainer: {
     alignItems: "center",
     justifyContent: "center",

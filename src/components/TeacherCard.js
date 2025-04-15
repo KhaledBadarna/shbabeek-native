@@ -21,20 +21,38 @@ const TeacherCard = ({
   const [registerModalVisible, setRegisterModalVisible] = useState(false);
 
   return (
-    <View style={[styles.card]}>
+    <View
+      style={[
+        styles.card,
+        showDetails && {
+          padding: 20,
+          shadowColor: "#000",
+          shadowOpacity: 0.1,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 4,
+          elevation: 3,
+        },
+      ]}
+    >
       <TouchableOpacity
         style={[styles.cardContainer, showDetails ? null : customStyle]}
         onPress={onPress}
       >
-        <View style={styles.favoriteIcon}>
-          <FavoriteIcon teacherId={teacherId} />
-        </View>
+        {showDetails && (
+          <View style={styles.favoriteIcon}>
+            <FavoriteIcon teacherId={teacherId} />
+          </View>
+        )}
         {/* Image & Teacher Name Container */}
         <View
           style={[
             styles.imageNameContainer,
             showDetails
-              ? { flexDirection: "row-reverse" }
+              ? {
+                  flexDirection: "row-reverse",
+                  marginBottom: 5,
+                  borderBottomWidth: 1,
+                }
               : {
                   flexDirection: "column",
                   alignItems: "center",
@@ -46,11 +64,7 @@ const TeacherCard = ({
             source={{ uri: profileImage }}
             style={[
               styles.profileImage,
-              showDetails
-                ? { borderRadius: 5 }
-                : {
-                    borderRadius: 100,
-                  },
+              showDetails ? { borderRadius: 5 } : { borderRadius: 100 },
             ]}
           />
           <View
@@ -202,22 +216,14 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    padding: 20,
     marginBottom: 15,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
   },
   cardContainer: {
     backgroundColor: "#ffff",
   },
   imageNameContainer: {
     flexDirection: "row-reverse", // Ensures image comes first, followed by name
-    marginBottom: 5,
-    borderBottomWidth: 1,
     borderBottomColor: "#e7e7e7",
     paddingVertical: 10,
   },
@@ -233,9 +239,8 @@ const styles = StyleSheet.create({
     color: "#031417",
     textAlign: "right", // Align name to the left
     fontFamily: "Cairo",
-    backgroundColor: "#009dff",
-    padding: 10,
-    borderRadius: 10,
+
+    padding: 6,
   },
   priceRatingContainer: {
     width: 250,

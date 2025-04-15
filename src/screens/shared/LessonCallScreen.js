@@ -55,13 +55,13 @@ const LessonCallScreen = ({ route, navigation }) => {
         lessonsCount: increment(1),
         pendingPayout: increment(paidAmount),
       };
-
       if (rating > 0) {
         const newAverage =
           (currentRating * currentRatingCount + rating) /
           (currentRatingCount + 1);
+
         updatePayload.ratingCount = increment(1);
-        updatePayload.rating = newAverage;
+        updatePayload.rating = Number(newAverage.toFixed(1)); // ✅ Round to 1 decimal place
       }
 
       await updateDoc(teacherRef, updatePayload);
