@@ -55,8 +55,8 @@ const StudentProfileScreen = () => {
         base64: false,
       });
 
-      if (!result.cancelled) {
-        const selectedImageUri = result.uri;
+      if (!result.canceled && result.assets?.length > 0) {
+        const selectedImageUri = result.assets[0].uri;
         setProfileImage(selectedImageUri);
         handleImageUpload(selectedImageUri);
       }

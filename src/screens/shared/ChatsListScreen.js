@@ -67,9 +67,16 @@ const ChatsListScreen = () => {
         );
 
         // ✅ Extract user details & attach the ID manually
+        const rawName = (
+          chatData.users[oppositeUserId]?.name || "مستخدم مجهول"
+        ).trim();
+        const [firstName, lastName = ""] = rawName.split(" ");
+        const formattedName = `${firstName} ${lastName.charAt(0)}.`.trim();
+
         const oppositeUser = {
-          id: oppositeUserId, // 🔥 Now ID is explicitly included
-          ...(chatData.users[oppositeUserId] || {}), // ✅ Fetch name & image
+          id: oppositeUserId,
+          name: formattedName,
+          profileImage: chatData.users[oppositeUserId]?.profileImage || "",
         };
 
         return {

@@ -161,9 +161,16 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
           }
 
           // Store user in Redux
+          const formattedName = existingUser.name
+            ? existingUser.name.split(" ")[0] +
+              (existingUser.name.split(" ")[1]
+                ? " " + existingUser.name.split(" ")[1][0] + "."
+                : "")
+            : "";
+
           dispatch(
             setUserInfo({
-              name: existingUser.name,
+              name: formattedName,
               phone: existingUser.phone,
               profileImage: existingUser.profileImage,
               userId: userIdToUse,
@@ -217,8 +224,11 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
       const userDocRef = doc(firestore, collectionName, userId); // ✅ Use stored ID
 
       await updateDoc(userDocRef, { name });
-
-      dispatch(setUserInfo({ name: name })); // ✅ Updates only the name
+      const formattedName = name
+        ? name.split(" ")[0] +
+          (name.split(" ")[1] ? " " + name.split(" ")[1][0] + "." : "")
+        : "";
+      dispatch(setUserInfo({ name: formattedName }));
 
       console.log("✅ Name updated successfully!");
       onClose();

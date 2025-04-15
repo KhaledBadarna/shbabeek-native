@@ -56,9 +56,13 @@ const fetchLessons = async (userType, userId, dispatch) => {
           const oppositeUserSnap = await getDoc(oppositeUserDocRef);
 
           if (oppositeUserSnap.exists()) {
+            const fullName = oppositeUserSnap.data().name || "Unknown User";
+            const [first, last = ""] = fullName.split(" ");
+            const formattedName = `${first} ${last.charAt(0)}.`.trim();
+
             const oppositeUserData = {
               id: oppositeUserSnap.id,
-              name: oppositeUserSnap.data().name || "Unknown User",
+              name: formattedName,
               profileImage: oppositeUserSnap.data().profileImage || "",
             };
 
