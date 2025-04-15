@@ -19,6 +19,12 @@
     ],
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "802e361c-3d19-463a-9dd3-010711e886da"
+      }
+    },
+    "owner": "khaled123aws"
   }
 }

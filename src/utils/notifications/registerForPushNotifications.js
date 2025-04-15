@@ -13,7 +13,7 @@ export async function registerForPushNotificationsAsync() {
 
     // Get the Expo push token
     const token = await Notifications.getExpoPushTokenAsync({
-      projectId: "shbabeek-12df9",
+      projectId: "802e361c-3d19-463a-9dd3-010711e886da",
     });
     console.log("📱 Expo Push Token:", token.data);
 
