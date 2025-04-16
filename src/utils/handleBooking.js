@@ -9,7 +9,7 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { firestore } from "../firebase";
-// import { uploadFile } from "./uploadFile";
+import { uploadFile } from "./uploadFile";
 import { addLesson } from "../redux/slices/lessonsSlice"; // ✅ Import Redux action
 import { checkStudentBookingConflict } from "./checkBookingConflict";
 

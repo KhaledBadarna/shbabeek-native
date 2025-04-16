@@ -97,7 +97,13 @@ const TeacherInfoScreen = ({ route, navigation }) => {
 
         {/* Stages */}
         <View style={styles.infoSection}>
-          <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <Icon name="school-outline" size={30} color="#555" />
             <Text style={styles.sectionTitle}>المراحل</Text>
           </View>
@@ -112,7 +118,13 @@ const TeacherInfoScreen = ({ route, navigation }) => {
 
         {/* Topics */}
         <View style={styles.infoSection}>
-          <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <Icon name="bookshelf" size={30} color="#555" />
             <Text style={styles.sectionTitle}>المواضيع</Text>
           </View>
@@ -126,8 +138,14 @@ const TeacherInfoScreen = ({ route, navigation }) => {
         </View>
 
         {/* Bio Section */}
-        <View style={styles.bioContainer}>
-          <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
+        <View style={styles.infoSection}>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <Icon name="card-account-details-outline" size={30} color="#555" />
             <Text style={styles.bioLabel}>نبذة عني </Text>
           </View>
@@ -165,13 +183,13 @@ const TeacherInfoScreen = ({ route, navigation }) => {
           }}
         >
           <Icon
-            name="email-fast-outline"
+            name="email-fast"
             size={35}
             color="#555"
             style={{
               borderWidth: 1.5,
-              padding: 13,
-              borderRadius: 5,
+              padding: 4,
+              borderRadius: 10,
               borderColor: "#d9d9d9",
             }}
           />
@@ -248,15 +266,7 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
     fontWeight: "900",
   },
-  bioContainer: {
-    paddingTop: 10,
-    backgroundColor: "#ffffff",
-    borderRadius: 10,
-    marginBottom: 5,
-    padding: 10,
-    marginTop: 5,
-    marginBottom: 20,
-  },
+
   bioLabel: {
     fontSize: 16,
     fontWeight: "700",
@@ -267,7 +277,7 @@ const styles = StyleSheet.create({
   bioText: {
     fontSize: 14,
     color: "#555",
-    marginTop: 5,
+    marginTop: 20,
     lineHeight: 20,
     fontFamily: "Cairo",
     textAlign: "right",
@@ -275,7 +285,7 @@ const styles = StyleSheet.create({
   infoSection: {
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    marginTop: 5,
+    marginTop: 10,
     padding: 10,
   },
   sectionTitle: {
@@ -288,7 +298,7 @@ const styles = StyleSheet.create({
   topicsContainer: {
     flexDirection: "row-reverse",
     justifyContent: "center",
-    paddingVertical: 10,
+    paddingVertical: 30,
   },
   topicText: {
     fontSize: 13,
@@ -327,11 +337,10 @@ const styles = StyleSheet.create({
     width: "80%",
     alignItems: "center",
     marginLeft: 10,
-    borderWidth: 1.5,
   },
   bookLessonText: {
     fontSize: 18,
-    color: "#333",
+    color: "#ffffff",
     fontFamily: "Cairo",
     fontWeight: "bold",
   },

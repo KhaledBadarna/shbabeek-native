@@ -22,7 +22,9 @@ import * as Notifications from "expo-notifications";
 import { View, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
 import { Cairo_400Regular, Cairo_700Bold } from "@expo-google-fonts/cairo";
-
+import { TextEncoder, TextDecoder } from "text-encoding";
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 const Stack = createStackNavigator();
 
 const linking = {

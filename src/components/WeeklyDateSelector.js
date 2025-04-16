@@ -81,7 +81,15 @@ const WeeklyDateSelector = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollViewContent}
+        contentContainerStyle={[
+          styles.scrollViewContent,
+          {
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            paddingStart: 15,
+          },
+        ]}
+        style={{ direction: "rtl" }}
         ref={scrollViewRef}
       >
         {dates.map(({ label, dateStr, dayNumber }, index) => {

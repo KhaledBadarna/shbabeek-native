@@ -190,7 +190,7 @@ const StudentHomeScreen = ({ navigation }) => {
             {favorites.length === 0 ? (
               <View style={styles.noFavoritesContainer}>
                 <Image
-                  source={require("../../assets/noFav.png")}
+                  source={require("../../assets/noFaceTeachers.png")}
                   style={styles.noFavoritesImage}
                 />
                 <Text style={styles.noFavoritesText}>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 10,
-    marginTop: 10,
+    margin: 10,
   },
   sectionTitle: {
     fontSize: 16,
@@ -305,9 +305,8 @@ const styles = StyleSheet.create({
     height: 200,
   },
   noFavoritesImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 10,
+    width: 150,
+    height: 150,
   },
   profileImage: {
     width: 50,

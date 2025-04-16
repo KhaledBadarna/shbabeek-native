@@ -5,7 +5,6 @@ import { Timestamp } from "firebase/firestore";
 
 const fetchLessons = async (userType, userId, dispatch) => {
   if (!userId) {
-    console.warn("⚠️ No userId provided to fetchLessons.");
     return;
   }
   if (typeof dispatch !== "function") {
@@ -76,13 +75,19 @@ const fetchLessons = async (userType, userId, dispatch) => {
         }
       }
     }
-    const sanitizedLessons = fetchedLessons.map((lesson) => ({
-      ...lesson,
-      createdAt:
-        lesson.createdAt instanceof Timestamp
-          ? lesson.createdAt.toDate().toISOString() // ✅ Convert Firestore Timestamp to ISO String
-          : lesson.createdAt,
-    }));
+    const sanitizedLessons = fetchedLessons.map((lesson) => {
+      const { createdAt, ...rest } = lesson;
+
+      return {
+        ...rest,
+        createdAt:
+          createdAt instanceof Timestamp
+            ? createdAt.toDate().toISOString()
+            : typeof createdAt === "string"
+            ? createdAt
+            : null, // fallback
+      };
+    });
 
     dispatch(setLessons(sanitizedLessons)); // ✅ Store only serializable data in Redux
   } catch (error) {

@@ -15,57 +15,54 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 const TopicTeachersScreen = ({ route, navigation }) => {
   const { topic } = route.params;
   const topicName = topic.name;
-  const [teachers, setTeachers] = useState([]);
+  const [allTeachers, setAllTeachers] = useState([]);
+  const [displayedTeachers, setDisplayedTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [sortFilters, setSortFilters] = useState({
     highestRated: false,
     lowestCost: false,
   });
   const [selectedCategories, setSelectedCategories] = useState([]);
-
-  const scrollViewRef = useRef(null); // Create a reference for ScrollView
+  const [lastIndex, setLastIndex] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    const fetchTeachers = async () => {
+    const fetchAllTeachers = async () => {
       try {
+        setLoading(true);
         const teachersRef = collection(firestore, "teachers");
         const q = query(
           teachersRef,
           where("topics", "array-contains", topicName)
         );
+        const snapshot = await getDocs(q);
 
-        const querySnapshot = await getDocs(q);
+        let data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        data = data.sort(() => 0.5 - Math.random()); // Shuffle
 
-        let fetchedTeachers = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Apply Sorting based on selected filters
-        if (sortFilters.lowestCost) {
-          // Sort by lowest price (ascending order)
-          fetchedTeachers = fetchedTeachers.sort((a, b) => {
-            return parseFloat(a.pricePerHour) - parseFloat(b.pricePerHour); // Ensuring proper comparison as numbers
-          });
-        }
-
-        if (sortFilters.highestRated) {
-          // Sort by highest rating (descending order)
-          fetchedTeachers = fetchedTeachers.sort((a, b) => {
-            return b.rating - a.rating; // Higher rating comes first
-          });
-        }
-
-        setTeachers(fetchedTeachers);
-      } catch (error) {
-        console.error("Error fetching teachers:", error);
+        setAllTeachers(data);
+        setDisplayedTeachers(data.slice(0, 10));
+        setLastIndex(10);
+        setHasMore(data.length > 10);
+      } catch (err) {
+        console.error("❌ Error fetching teachers:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTeachers();
-  }, [topicName, sortFilters]); // Fetch teachers whenever filters change
+    fetchAllTeachers();
+  }, [topicName]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: false });
+      }
+    }, 100);
+  }, []);
 
   const handleTeacherPress = (teacher) => {
     navigation.navigate("صفحة المعلم", {
@@ -79,7 +76,6 @@ const TopicTeachersScreen = ({ route, navigation }) => {
     setSortFilters((prevFilters) => ({
       ...prevFilters,
       [filter]: !prevFilters[filter],
-      // Ensure the other filter is turned off when one is toggled
       [filter === "highestRated" ? "lowestCost" : "highestRated"]: false,
     }));
   };
@@ -108,26 +104,35 @@ const TopicTeachersScreen = ({ route, navigation }) => {
     );
   };
 
-  // Sorting teachers based on the selected filters (price and rating)
-  let filteredTeachers = [...teachers];
+  const getFilteredTeachers = () => {
+    let filtered = [...displayedTeachers];
 
-  // Apply category filter (if selected)
-  if (selectedCategories.length > 0) {
-    filteredTeachers = filteredTeachers.filter(
-      (teacher) =>
-        selectedCategories.every((cat) => teacher.stages?.includes(cat)) // Ensure teacher teaches all selected levels
-    );
-  }
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((teacher) =>
+        selectedCategories.every((cat) => teacher.stages?.includes(cat))
+      );
+    }
 
-  // Sorting the filtered teachers based on the selected filter (rating or price)
-  // If highestRated filter is selected, sort by rating descending (from 5 to 0)
-  if (sortFilters.highestRated) {
-    filteredTeachers.sort((a, b) => b.rating - a.rating); // Sort by rating descending
-  }
-  // If lowestCost filter is selected, sort by price ascending (from low to high)
-  else if (sortFilters.lowestCost) {
-    filteredTeachers.sort((a, b) => a.pricePerHour - b.pricePerHour); // Sort by price ascending
-  }
+    if (sortFilters.highestRated) {
+      filtered.sort((a, b) => b.rating - a.rating);
+    } else if (sortFilters.lowestCost) {
+      filtered.sort((a, b) => a.pricePerHour - b.pricePerHour);
+    }
+
+    return filtered;
+  };
+
+  const loadMore = () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    const nextIndex = lastIndex + 10;
+    const nextBatch = allTeachers.slice(lastIndex, nextIndex);
+    setDisplayedTeachers((prev) => [...prev, ...nextBatch]);
+    setLastIndex(nextIndex);
+    if (nextIndex >= allTeachers.length) setHasMore(false);
+    setLoadingMore(false);
+  };
 
   if (loading) {
     return (
@@ -139,15 +144,19 @@ const TopicTeachersScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Sorting Filters */}
       <View style={styles.filters}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterButtons}
-          ref={scrollViewRef} // Attach the ref to the ScrollView
+          contentContainerStyle={{
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            paddingStart: 15,
+          }}
+          style={{ direction: "rtl" }} // <-- this tells it to scroll from right
+          ref={scrollViewRef}
         >
-          <View style={styles.filterButtons}>
+          <View style={styles.filterButtonsInner}>
             {["ثانوي", "اعدادي", "ابتدائي"].map((category) => (
               <TouchableOpacity
                 key={category}
@@ -204,20 +213,35 @@ const TopicTeachersScreen = ({ route, navigation }) => {
         </ScrollView>
       </View>
 
-      {/* Teacher Cards Grid */}
       <View style={styles.filterContainer}>
         <FlatList
-          data={filteredTeachers} // Make sure filteredTeachers contain the sorted results
-          key={2}
+          data={getFilteredTeachers()}
           renderItem={renderCard}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            !hasMore ? (
+              <Text
+                style={{
+                  textAlign: "center",
+                  paddingVertical: 20,
+                  color: "#888",
+                  fontFamily: "Cairo",
+                }}
+              >
+                لا يوجد معلمين إضافيين
+              </Text>
+            ) : null
+          }
         />
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -230,9 +254,11 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ebebeb",
   },
   filterButtons: {
-    flexDirection: "row", // Keep items in a row (noطضt reversed)
-    paddingLeft: 50, // Give extra space on the left to push the content to the right
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  filterButtonsInner: {
+    flexDirection: "row-reverse",
   },
   filterButton: {
     paddingVertical: 8,
@@ -244,11 +270,6 @@ const styles = StyleSheet.create({
   },
   activeFilter: {
     backgroundColor: "#009dff",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    marginRight: 10,
-    marginTop: 10,
   },
   filterText: {
     color: "#555",
@@ -272,7 +293,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 10,
   },
-
   loadingContainer: {
     flex: 1,
     justifyContent: "center",

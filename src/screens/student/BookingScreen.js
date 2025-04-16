@@ -75,21 +75,47 @@ const BookingScreen = ({ route }) => {
   // Handle file attachment
   const handleAttachFile = async () => {
     try {
-      const result = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles], // You can customize this
-        allowMultiSelection: false,
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        copyToCacheDirectory: true,
+        multiple: false,
       });
 
-      if (result && result[0]) {
-        setFileAttached(result[0]); // result is an array
-      } else {
-        console.log("No file selected.");
+      if (result && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+
+        const formData = new FormData();
+        formData.append("file", {
+          uri: file.uri,
+          name: file.name || "upload",
+          type: file.mimeType || "application/octet-stream",
+        });
+        formData.append("upload_preset", "YOUR_UPLOAD_PRESET");
+        formData.append("cloud_name", "YOUR_CLOUD_NAME");
+
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/auto/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        const data = await res.json();
+        if (data.secure_url) {
+          setFileAttached({ ...file, cloudUrl: data.secure_url });
+          console.log("✅ File uploaded to Cloudinary:", data.secure_url);
+        } else {
+          console.error("❌ Cloudinary error:", data);
+          alert("فشل رفع الملف إلى الخادم");
+        }
       }
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
         console.log("User canceled file selection.");
       } else {
-        console.error("Error picking file:", error);
+        console.error("Error picking or uploading file:", error);
+        alert("حدث خطأ أثناء رفع الملف");
       }
     }
   };
@@ -332,12 +358,12 @@ const BookingScreen = ({ route }) => {
                 onPress={handleAttachFile}
                 style={styles.attachFileButton}
               >
-                <Icon name="attachment" size={24} color="#009dff" />
                 <Text style={styles.attachFileText}>
                   {fileAttached
                     ? `ملف مرفق: ${fileAttached.name}`
                     : "إرفاق ملف"}
                 </Text>
+                <Icon name="attachment" size={24} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </>
@@ -353,7 +379,7 @@ const BookingScreen = ({ route }) => {
             <Text style={styles.payButtonText}>
               الدفع باستخدام {defaultPaymentMethod}
             </Text>
-            <Icon name="apple" size={30} color="#00d9ff" />
+            <Icon name="apple" size={30} color="#ffffff" />
           </TouchableOpacity>
         </View>
       )}
@@ -427,11 +453,13 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   attachFileButton: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
     padding: 10,
     backgroundColor: "#009dff",
+    borderRadius: 10,
   },
   sendButton: {
     backgroundColor: "#009dff",
@@ -495,6 +523,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   successMessageText: { fontFamily: "Cairo", marginTop: 10 },
+  attachFileText: { fontFamily: "Cairo", color: "#fff" },
 });
 
 export default BookingScreen;
