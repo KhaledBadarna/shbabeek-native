@@ -1,95 +1,177 @@
-import React, { useEffect, useState } from "react";
-import { View } from "react-native";
-import JitsiMeet, { JitsiMeetView } from "react-native-jitsi-meet";
-import RatingModal from "../../components/modals/RatingModal";
-import { updateDoc, doc, increment, getDoc } from "firebase/firestore";
-import { firestore } from "../../firebase";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  PermissionsAndroid,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
+import {
+  createAgoraRtcEngine,
+  ChannelProfileType,
+  ClientRoleType,
+  RtcSurfaceView,
+  VideoRenderModeType,
+} from "react-native-agora";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const LessonCallScreen = ({ route, navigation }) => {
-  const { roomName, oppositeUser, lessonId, teacherId, paidAmount } =
-    route.params;
+const APP_ID = "15ef0849bb20486ba1a533f2e976d7fc";
+const CHANNEL_NAME = "lesson123";
+const TOKEN = null;
+const UID = 0;
+const LESSON_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-  const [showModal, setShowModal] = useState(false);
+const LessonCallScreen = ({ navigation }) => {
+  const [engine] = useState(() => createAgoraRtcEngine());
+  const [joined, setJoined] = useState(false);
+  const [remoteUid, setRemoteUid] = useState(null);
+  const [micOn, setMicOn] = useState(true);
+  const [camOn, setCamOn] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(LESSON_DURATION);
+  const timerRef = useRef(null);
 
   useEffect(() => {
-    const url = `https://meet.jit.si/${roomName}`;
-    const userInfo = { displayName: oppositeUser };
+    if (Platform.OS === "android") requestPermissions();
 
-    setTimeout(() => {
-      JitsiMeet.call(url, userInfo, {
-        audioMuted: true,
-        videoMuted: false,
-        featureFlags: {
-          "welcomepage.enabled": false,
-          "pip.enabled": false,
-          "add-people.enabled": false,
-          "calendar.enabled": false,
-          "recording.enabled": true,
-          "live-streaming.enabled": true,
-          "meeting-name.enabled": true,
-          "toolbox.alwaysVisible": true,
-          "ios.screensharing.enabled": true,
-        },
-      });
-    }, 500);
+    engine.initialize({
+      appId: APP_ID,
+      channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
+    });
+
+    engine.registerEventHandler({
+      onJoinChannelSuccess: () => {
+        setJoined(true);
+        startTimer();
+      },
+      onUserJoined: (connection, uid) => setRemoteUid(uid),
+      onUserOffline: (connection, uid) => setRemoteUid(null),
+    });
+
+    engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
+    engine.enableVideo();
+    engine.joinChannel(TOKEN, CHANNEL_NAME, UID);
 
     return () => {
-      JitsiMeet.endCall();
+      stopTimer();
+      engine.leaveChannel();
+      engine.release();
     };
   }, []);
 
-  const handleLessonEnd = async (rating) => {
-    try {
-      await updateDoc(doc(firestore, "lessons", lessonId), {
-        isLessonCompleted: true,
+  const requestPermissions = async () => {
+    await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    ]);
+  };
+
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1000) {
+          stopTimer();
+          handleLeave();
+          return 0;
+        }
+        return prev - 1000;
       });
+    }, 1000);
+  };
 
-      const teacherRef = doc(firestore, "teachers", teacherId);
-      const teacherSnap = await getDoc(teacherRef);
-      const teacherData = teacherSnap.data();
+  const stopTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
 
-      const currentRating = teacherData.rating || 0;
-      const currentRatingCount = teacherData.ratingCount || 0;
+  const formatTime = (ms) => {
+    const totalSec = Math.floor(ms / 1000);
+    const min = String(Math.floor(totalSec / 60)).padStart(2, "0");
+    const sec = String(totalSec % 60).padStart(2, "0");
+    return `${min}:${sec}`;
+  };
 
-      const updatePayload = {
-        lessonsCount: increment(1),
-        pendingPayout: increment(Math.floor(paidAmount * 0.93)),
-      };
-      if (rating > 0) {
-        const newAverage =
-          (currentRating * currentRatingCount + rating) /
-          (currentRatingCount + 1);
+  const toggleMic = () => {
+    engine.muteLocalAudioStream(micOn);
+    setMicOn((prev) => !prev);
+  };
 
-        updatePayload.ratingCount = increment(1);
-        updatePayload.rating = Number(newAverage.toFixed(1)); // ✅ Round to 1 decimal place
-      }
+  const toggleCamera = () => {
+    engine.muteLocalVideoStream(camOn);
+    setCamOn((prev) => !prev);
+  };
 
-      await updateDoc(teacherRef, updatePayload);
-    } catch (err) {
-      console.error("❌ Error updating lesson or teacher stats:", err);
-    }
-
-    navigation.navigate("Home");
+  const handleLeave = () => {
+    engine.leaveChannel();
+    stopTimer();
+    navigation.goBack();
   };
 
   return (
-    <>
-      <JitsiMeetView
-        style={{ flex: 1 }}
-        onConferenceTerminated={() => setShowModal(true)}
-      />
-      {showModal && (
-        <RatingModal
-          visible={showModal}
-          onClose={() => setShowModal(false)}
-          onSubmit={(rating) => {
-            setShowModal(false);
-            handleLessonEnd(rating);
-          }}
+    <View style={styles.container}>
+      {joined && camOn && (
+        <RtcSurfaceView canvas={{ uid: 0 }} style={styles.fullScreen} />
+      )}
+      {joined && remoteUid !== null && (
+        <RtcSurfaceView
+          canvas={{ uid: remoteUid }}
+          style={styles.remote}
+          renderMode={VideoRenderModeType.VideoRenderModeHidden}
         />
       )}
-    </>
+
+      <View style={styles.controls}>
+        <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
+        <TouchableOpacity onPress={toggleMic} style={styles.controlButton}>
+          <Icon
+            name={micOn ? "microphone" : "microphone-off"}
+            size={28}
+            color="#fff"
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleCamera} style={styles.controlButton}>
+          <Icon name={camOn ? "video" : "video-off"} size={28} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleLeave}
+          style={[styles.controlButton, { backgroundColor: "#ff4444" }]}
+        >
+          <Icon name="phone-hangup" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#000" },
+  fullScreen: { flex: 1 },
+  remote: {
+    width: 120,
+    height: 160,
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#222",
+  },
+  controls: {
+    position: "absolute",
+    bottom: 30,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+  },
+  controlButton: {
+    backgroundColor: "#333",
+    padding: 12,
+    borderRadius: 50,
+  },
+  timer: {
+    color: "#fff",
+    fontSize: 18,
+    marginRight: 10,
+  },
+});
 
 export default LessonCallScreen;
