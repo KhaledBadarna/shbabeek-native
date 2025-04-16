@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -7,7 +7,7 @@ const BankDetailsScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { bankDetails, setBankDetails, setHasChanges } = route.params; // ✅ Get state from TeacherSettingsScreen
+  const { bankDetails, setBankDetails, setHasChanges } = route.params;
 
   const [fullName, setFullName] = useState(bankDetails.fullName || "");
   const [bankNumber, setBankNumber] = useState(bankDetails.bankNumber || "");
@@ -16,7 +16,6 @@ const BankDetailsScreen = () => {
     bankDetails.accountNumber || ""
   );
 
-  // ✅ Update parent state when user exits the screen
   const saveTemporaryData = async () => {
     const updatedBankDetails = {
       fullName,
@@ -32,8 +31,8 @@ const BankDetailsScreen = () => {
       updatedBankDetails.accountNumber !== bankDetails.accountNumber;
 
     if (isChanged) {
-      setBankDetails(updatedBankDetails); // ✅ Update parent
-      setHasChanges(true); // ✅ Only mark as changed if values actually changed
+      setBankDetails(updatedBankDetails);
+      setHasChanges(true);
 
       await AsyncStorage.setItem(
         "bankDetails",
@@ -42,7 +41,6 @@ const BankDetailsScreen = () => {
     }
   };
 
-  // ✅ Save before navigating back
   useEffect(() => {
     const unsubscribe = navigation.addListener(
       "beforeRemove",
@@ -52,81 +50,86 @@ const BankDetailsScreen = () => {
   }, [fullName, bankNumber, branchBank, accountNumber]);
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-        تفاصيل الحساب البنكي{" "}
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>تفاصيل الحساب البنكي</Text>
 
-      {/* Full Name Input */}
       <TextInput
-        placeholder="Full Name (First & Last)"
+        placeholder="الاسم الكامل"
+        placeholderTextColor="#999"
         value={fullName}
         onChangeText={setFullName}
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          padding: 10,
-          marginBottom: 15,
-          borderRadius: 5,
-        }}
+        style={styles.input}
       />
 
-      {/* Bank Number & Branch Bank in One Row */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={styles.row}>
         <TextInput
-          placeholder="Bank Number"
+          placeholder="رقم البنك"
+          placeholderTextColor="#999"
           value={bankNumber}
           onChangeText={(text) => {
             if (/^\d{0,2}$/.test(text)) setBankNumber(text);
           }}
           keyboardType="numeric"
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: "#ccc",
-            padding: 10,
-            marginRight: 10,
-            borderRadius: 5,
-          }}
+          style={[styles.input, { marginRight: 10, flex: 1 }]}
         />
 
         <TextInput
-          placeholder="Branch Bank"
+          placeholder="فرع البنك"
+          placeholderTextColor="#999"
           value={branchBank}
           onChangeText={(text) => {
             if (/^\d{0,3}$/.test(text)) setBranchBank(text);
           }}
           keyboardType="numeric"
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: "#ccc",
-            padding: 10,
-            borderRadius: 5,
-          }}
+          style={[styles.input, { flex: 1 }]}
         />
       </View>
 
-      {/* Bank Account Number */}
       <TextInput
-        placeholder="Bank Account Number"
+        placeholder="رقم الحساب البنكي"
+        placeholderTextColor="#999"
         value={accountNumber}
         onChangeText={(text) => {
-          if (/^\d{0,10}$/.test(text)) setAccountNumber(text); // ✅ Allows up to 10 digits
+          if (/^\d{0,10}$/.test(text)) setAccountNumber(text);
         }}
         keyboardType="numeric"
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          padding: 10,
-          marginTop: 15,
-          borderRadius: 5,
-        }}
+        style={[styles.input, { marginTop: 15 }]}
       />
-
-      {/* ✅ No "Save" button needed. Data is stored temporarily until saved in TeacherSettingsScreen */}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    fontFamily: "Cairo",
+    color: "#031417",
+    textAlign: "right",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 12,
+    borderRadius: 10,
+    fontFamily: "Cairo",
+    fontSize: 15,
+    textAlign: "right",
+    color: "#031417",
+    backgroundColor: "#f9f9f9",
+    margin: 10,
+  },
+  row: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+});
 
 export default BankDetailsScreen;

@@ -19,7 +19,6 @@ export const handleBooking = async (
   selectedSlot,
   selectedDate,
   studentId,
-  message,
   file,
   selectedTopic,
   dispatch
@@ -37,12 +36,12 @@ export const handleBooking = async (
       console.log("⛔️ Time conflict found — blocking booking");
       return { success: false, reason: "conflict" };
     }
-    console.log("🔥 Booking conflict found?", conflict);
+
     // Upload file if available
     const fileUrl = file ? await uploadFile(file) : null;
 
-    // Prepare lesson data
-    const lessonData = {
+    // ✅ Base lesson data (without timestamps)
+    const baseLessonData = {
       teacherId,
       studentId,
       selectedDate,
@@ -50,35 +49,43 @@ export const handleBooking = async (
       day: selectedSlot.day,
       startTime: selectedSlot.startTime,
       endTime: selectedSlot.endTime,
-      message,
       fileUrl,
-      isLessonCompleted: false, // ✅ Track completion status
-      createdAt: serverTimestamp(),
+      isLessonCompleted: false,
       paidAmount: teacher.pricePerHour,
       isTeacherPaidOut: false,
     };
 
-    // ✅ **Step 1: Add lesson to Firestore**
+    // ✅ Step 1: Add lesson to Firestore
+    const firestoreLessonData = {
+      ...baseLessonData,
+      createdAt: serverTimestamp(), // ✅ Firestore only
+    };
+
     const lessonRef = await addDoc(
       collection(firestore, "lessons"),
-      lessonData
+      firestoreLessonData
     );
     const lessonId = lessonRef.id;
 
-    // ✅ **Step 2: Dispatch to Redux (before updating other collections)**
+    // ✅ Step 2: Dispatch to Redux (no serverTimestamp here!)
+    const reduxLessonData = {
+      ...baseLessonData, // ✅ this is the correct object name
+      createdAt: Date.now(), // ✅ use serializable timestamp
+    };
+
     dispatch(
       addLesson({
         id: lessonId,
-        ...lessonData,
+        ...reduxLessonData,
         oppositeUser: {
-          id: teacherId, // ✅ Teacher ID
-          name: teacher.name || "Unknown", // ✅ Teacher's Name
-          profileImage: teacher.profileImage || "", // ✅ Teacher's Profile Image
+          id: teacherId,
+          name: teacher.name || "Unknown",
+          profileImage: teacher.profileImage || "",
         },
       })
     );
 
-    // ✅ **Step 3: Update student booking history**
+    // ✅ Step 3: Update student booking history
     const studentBookingRef = doc(firestore, "bookings", studentId);
     const studentBookingDoc = await getDoc(studentBookingRef);
     if (studentBookingDoc.exists()) {
@@ -87,7 +94,7 @@ export const handleBooking = async (
       await setDoc(studentBookingRef, { lessonIds: [lessonId] });
     }
 
-    // ✅ **Step 4: Update teacher booking history**
+    // ✅ Step 4: Update teacher booking history
     const teacherBookingRef = doc(firestore, "bookings", teacherId);
     const teacherBookingDoc = await getDoc(teacherBookingRef);
     if (teacherBookingDoc.exists()) {
@@ -96,7 +103,7 @@ export const handleBooking = async (
       await setDoc(teacherBookingRef, { lessonIds: [lessonId] });
     }
 
-    // ✅ **Step 5: Update teacher's availability slots**
+    // ✅ Step 5: Update teacher availability slot
     const teacherAvailabilityRef = doc(
       firestore,
       "teacher_availability",
@@ -108,7 +115,6 @@ export const handleBooking = async (
       const availabilityData = teacherAvailabilityDoc.data();
       const updatedSlots = { ...availabilityData.slots };
 
-      // ✅ Modify only the selected slot
       if (updatedSlots[selectedSlot.day]) {
         updatedSlots[selectedSlot.day] = updatedSlots[selectedSlot.day].map(
           (slot) => {
@@ -119,15 +125,14 @@ export const handleBooking = async (
               return {
                 ...slot,
                 isBooked: true,
-                date: selectedDate, // ✅ Add selectedDate to the slot
-              }; // ✅ Mark as booked
+                date: selectedDate,
+              };
             }
             return slot;
           }
         );
       }
 
-      // ✅ Update Firestore with the new slots
       await updateDoc(teacherAvailabilityRef, { slots: updatedSlots });
       console.log("✅ Slot successfully updated to 'booked'!");
     }
@@ -135,5 +140,6 @@ export const handleBooking = async (
     console.error("❌ Error booking lesson:", error);
     throw new Error("Error booking lesson, please try again.");
   }
+
   return { success: true };
 };

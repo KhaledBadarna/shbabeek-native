@@ -12,16 +12,7 @@ import AuthModal from "../components/modals/AuthModal";
 
 import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native";
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { firestore } from "../firebase";
 import ChatsListScreen from "../screens/shared/ChatsListScreen";
 import StudentHomeScreen from "../screens/student/StudentHomeScreen";

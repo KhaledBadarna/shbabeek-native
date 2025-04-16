@@ -6,13 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  Keyboard,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import Topics from "../../components/Topics";
-import { doc, getDoc, setDoc } from "firebase/firestore"; // Import Firestore methods
+import { doc, setDoc } from "firebase/firestore"; // Import Firestore methods
 import { firestore } from "../../firebase"; // Assuming firestore is initialized
 import { useSelector } from "react-redux"; // Import Redux
 import { useNavigation, useRoute } from "@react-navigation/native"; // Import Navigation
@@ -22,7 +18,6 @@ import { setTeacherData } from "../../redux/slices/teacherSlice"; // ✅ if not 
 import InfoModal from "../../components/modals/InfoModal";
 const TeacherSettingsScreen = () => {
   const navigation = useNavigation(); // Initialize navigation
-  const route = useRoute(); // Initialize navigation
   const dispatch = useDispatch(); // ✅ add this at top
 
   const [selectedTopics, setSelectedTopics] = useState([]); // Store selected topics
@@ -61,7 +56,12 @@ const TeacherSettingsScreen = () => {
     ) {
       setInfoText("يرجى ملئ جميع التفاصيل");
       setInfoVisible(true);
+      return;
+    }
 
+    if (parseInt(price, 10) < 20) {
+      setInfoText("❌ الحد الأدنى للسعر هو 20 شيقل");
+      setInfoVisible(true);
       return;
     }
 
@@ -195,7 +195,7 @@ const TeacherSettingsScreen = () => {
         <View style={styles.priceContainer}>
           <View style={styles.titleIconCont}>
             <Text style={styles.title}> السعر</Text>
-            <Icon name="currency-usd" size={25} color="#555" />
+            <Icon name="cash-fast" size={30} color="#555" />
           </View>
 
           <Text

@@ -37,7 +37,7 @@ const TeacherBookingScreen = ({ route, navigation }) => {
           slots.map((slot) => ({ ...slot, day }))
         );
 
-        setAvailableSlots(allSlots.filter((slot) => !slot.isBooked));
+        setAvailableSlots(allSlots); // ✅ keep full data here
       }
     );
 
@@ -71,9 +71,9 @@ const TeacherBookingScreen = ({ route, navigation }) => {
       <WeeklyDateSelector
         selectedDate={selectedDate}
         onSelectDate={setSelectedDate}
-        availableSlots={availableSlots}
+        availableSlots={availableSlots.filter((slot) => !slot.isBooked)} // ✅ only unbooked
         type="availability"
-        startFromTomorrow={true} // ⛔️ Skip today on booking
+        startFromTomorrow={true}
       />
 
       <View style={styles.slotsContainer}>

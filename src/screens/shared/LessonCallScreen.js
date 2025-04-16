@@ -53,7 +53,7 @@ const LessonCallScreen = ({ route, navigation }) => {
 
       const updatePayload = {
         lessonsCount: increment(1),
-        pendingPayout: increment(paidAmount),
+        pendingPayout: increment(Math.floor(paidAmount * 0.93)),
       };
       if (rating > 0) {
         const newAverage =

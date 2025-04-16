@@ -139,9 +139,19 @@ const BookingScreen = ({ route }) => {
       >
         {showSuccessMessage ? (
           <View style={styles.successMessageContainer}>
+            <Image
+              source={require("../../assets/success.png")} // أو استبدل برابط Cloudinary
+              style={{
+                width: 200,
+                height: 200,
+                marginBottom: 10,
+                borderRadius: 40,
+              }}
+              resizeMode="contain"
+            />
             <Icon name="check-decagram" size={50} color="#009dff" />
             <Text style={styles.successMessageText}>
-              تم حجز الدرس بنجاح! الرجاء انتظار موافقة المعلم على الطلب
+              تم حجز الدرس بنجاح! يمكنك رؤية الدروس في قائمة "دروسي"
             </Text>
           </View>
         ) : (
@@ -177,7 +187,7 @@ const BookingScreen = ({ route }) => {
                 {selectedSlot.day}, {selectedDate}
               </Text>
               <Text style={styles.selectedTimeText}>
-                <Icon name="clock-time-ten" size={15} color="#031417" />{" "}
+                <Icon name="clock-time-ten" size={15} color="#031417" />
                 {selectedSlot.startTime}-{selectedSlot.endTime}
               </Text>
             </View>
