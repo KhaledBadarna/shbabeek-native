@@ -17,7 +17,7 @@ import LessonCallScreen from "./src/screens/shared/LessonCallScreen";
 import ChatScreen from "./src/screens/shared/ChatScreen";
 import CompletedLessonsScreen from "./src/screens/teacher/CompletedLessonsScreen";
 import PendingPayoutLessonsScreen from "./src/screens/teacher/PendingPayoutLessonsScreen";
-
+import TeacherAvailability from "./src/screens/teacher/TeacherAvailability";
 import * as Notifications from "expo-notifications";
 import { View, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
@@ -186,6 +186,11 @@ export default function App() {
           <Stack.Screen
             name="PendingPayoutLessonsScreen"
             component={PendingPayoutLessonsScreen}
+            options={{ title: "الدروس المكتملة" }}
+          />
+          <Stack.Screen
+            name="TeacherAvailability"
+            component={TeacherAvailability}
             options={{ title: "الدروس المكتملة" }}
           />
         </Stack.Navigator>

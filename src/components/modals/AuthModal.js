@@ -212,6 +212,9 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
     if (!name.trim()) {
       alert("يرجى إدخال اسم صحيح");
       return;
+    } else if (/\d/.test(name.trim())) {
+      alert("❌ الاسم لا يمكن أن يحتوي على أرقام!");
+      return;
     }
 
     if (!userId) {
@@ -221,7 +224,7 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
 
     try {
       const collectionName = userType === "teacher" ? "teachers" : "students";
-      const userDocRef = doc(firestore, collectionName, userId); // ✅ Use stored ID
+      const userDocRef = doc(firestore, collectionName, userId);
 
       await updateDoc(userDocRef, { name });
       const formattedName = name

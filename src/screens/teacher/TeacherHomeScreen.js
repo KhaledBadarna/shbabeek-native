@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { useFocusEffect } from "@react-navigation/native"; // ✅ Import correctly
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   collection,
   onSnapshot,
@@ -12,22 +12,24 @@ import {
   doc,
 } from "firebase/firestore";
 import { firestore } from "../../firebase";
-import { setLessons } from "../../redux/slices/lessonsSlice"; // ✅ Import Redux action
+import { setLessons } from "../../redux/slices/lessonsSlice";
 import LessonsCard from "../../components/LessonsCard";
-import { Timestamp } from "firebase/firestore";
 import WeeklyDateSelector from "../../components/WeeklyDateSelector";
+import { Timestamp } from "firebase/firestore";
+
 const TeacherHomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState("");
-  const lessons = useSelector((state) => state.lessons); // ✅ GET LESSONS HERE
-
+  const [hasAvailability, setHasAvailability] = useState(false);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const lessons = useSelector((state) => state.lessons);
+  const teacherData = useSelector((state) => state.teacher);
   const {
     name,
     profileImage,
     userId: teacherId,
-  } = useSelector((state) => state.user); // ✅ Get teacher ID
+  } = useSelector((state) => state.user);
 
-  // ✅ 1️⃣ Use Firestore `onSnapshot` for Real-Time Updates
   useEffect(() => {
     if (!teacherId) return;
 
@@ -41,20 +43,16 @@ const TeacherHomeScreen = () => {
 
       for (const docSnap of snapshot.docs) {
         let lesson = { id: docSnap.id, ...docSnap.data() };
-
-        // ✅ Fetch Opposite User (Student) Details
         const studentDocRef = doc(firestore, "students", lesson.studentId);
         const studentSnap = await getDoc(studentDocRef);
 
-        if (studentSnap.exists()) {
-          lesson.oppositeUser = {
-            id: studentSnap.id,
-            name: studentSnap.data().name || "Unknown",
-            profileImage: studentSnap.data().profileImage || "",
-          };
-        } else {
-          lesson.oppositeUser = { name: "Unknown", profileImage: "" };
-        }
+        lesson.oppositeUser = studentSnap.exists()
+          ? {
+              id: studentSnap.id,
+              name: studentSnap.data().name || "Unknown",
+              profileImage: studentSnap.data().profileImage || "",
+            }
+          : { name: "Unknown", profileImage: "" };
 
         updatedLessons.push({
           ...lesson,
@@ -65,43 +63,38 @@ const TeacherHomeScreen = () => {
         });
       }
 
-      dispatch(setLessons(updatedLessons)); // ✅ Now Redux-safe
+      dispatch(setLessons(updatedLessons));
     });
 
-    return () => unsubscribe(); // Cleanup listener
-  }, [teacherId, dispatch]);
+    return () => unsubscribe();
+  }, [teacherId]);
 
-  // ✅ 2️⃣ Fetch Fresh Data When Entering Screen (useFocusEffect)
   useFocusEffect(
     useCallback(() => {
-      const fetchLessons = async () => {
+      const fetchLessonsAndAvailability = async () => {
         if (!teacherId) return;
 
+        // Fetch lessons
         try {
           const q = query(
             collection(firestore, "lessons"),
             where("teacherId", "==", teacherId)
           );
           const snapshot = await getDocs(q);
-
           const fetchedLessons = [];
 
           for (const docSnap of snapshot.docs) {
             let lesson = { id: docSnap.id, ...docSnap.data() };
-
-            // ✅ Fetch Opposite User (Student) Details
             const studentDocRef = doc(firestore, "students", lesson.studentId);
             const studentSnap = await getDoc(studentDocRef);
 
-            if (studentSnap.exists()) {
-              lesson.oppositeUser = {
-                id: studentSnap.id,
-                name: studentSnap.data().name || "Unknown",
-                profileImage: studentSnap.data().profileImage || "",
-              };
-            } else {
-              lesson.oppositeUser = { name: "Unknown", profileImage: "" };
-            }
+            lesson.oppositeUser = studentSnap.exists()
+              ? {
+                  id: studentSnap.id,
+                  name: studentSnap.data().name || "Unknown",
+                  profileImage: studentSnap.data().profileImage || "",
+                }
+              : { name: "Unknown", profileImage: "" };
 
             fetchedLessons.push({
               ...lesson,
@@ -112,33 +105,58 @@ const TeacherHomeScreen = () => {
             });
           }
 
-          dispatch(setLessons(fetchedLessons)); // ✅ Now Redux-safe
+          dispatch(setLessons(fetchedLessons));
         } catch (error) {
           console.error("❌ Error fetching lessons:", error);
         }
+
+        // Fetch availability
+        try {
+          const ref = doc(firestore, "teacher_availability", teacherId);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            const allSlots = snap.data().slots || {};
+            const flatSlots = Object.values(allSlots).flat();
+            setHasAvailability(flatSlots.length > 0);
+          } else {
+            setHasAvailability(false);
+          }
+        } catch (err) {
+          console.error("❌ Error checking availability:", err);
+          setHasAvailability(false);
+        }
       };
 
-      fetchLessons();
+      fetchLessonsAndAvailability();
     }, [dispatch, teacherId])
   );
 
-  // ✅ 3️⃣ Handle Balance Transfer
-  const handleTransferToBank = () => {
-    console.log("Transfer to bank account initiated");
-  };
+  const hasNoInfo =
+    !teacherData?.bio ||
+    !teacherData?.pricePerHour ||
+    !teacherData?.topics?.length ||
+    !teacherData?.stages?.length ||
+    !teacherData?.bankDetails?.fullName;
+
+  const currentWeekDates = (() => {
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    return [...Array(7)].map((_, i) => {
+      const date = new Date(weekStart);
+      date.setDate(weekStart.getDate() + i);
+      return date.toISOString().split("T")[0];
+    });
+  })();
+
+  const hasLessonsThisWeek = lessons.some((lesson) =>
+    currentWeekDates.includes(lesson.selectedDate)
+  );
 
   return (
     <View style={styles.mainContainer}>
-      <View
-        style={{
-          backgroundColor: "#fff",
-          marginVertical: 10,
-          borderRadius: 10,
-          padding: 10,
-        }}
-      >
+      <View style={styles.headerContainer}>
         <View style={styles.greetingRow}>
-          {/* ✅ Show profile image if exists, otherwise show default image */}
           <Image
             source={
               profileImage
@@ -151,17 +169,15 @@ const TeacherHomeScreen = () => {
         </View>
         <Text style={styles.subTitle}>ابدا الربح الآن!</Text>
       </View>
-      <View style={{ backgroundColor: "#fff", padding: 10, borderRadius: 10 }}>
-        <View style={styles.commingLessonsCont}>
-          <Text style={styles.comingLessonsText}>الدروس القادمة:</Text>
-        </View>
+
+      <View style={styles.section}>
+        <Text style={styles.comingLessonsText}>الدروس القادمة:</Text>
         <WeeklyDateSelector
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
           availableSlots={lessons}
           type="lessons"
         />
-        {/* List of lessons */}
         <LessonsCard
           lessons={lessons
             .filter((lesson) => lesson.selectedDate === selectedDate)
@@ -174,68 +190,47 @@ const TeacherHomeScreen = () => {
             })}
         />
       </View>
+
+      {!hasLessonsThisWeek && (
+        <View style={styles.infoBox}>
+          {hasNoInfo ? (
+            <>
+              <Text style={styles.infoText}>
+                لم تقم بعد بإدخال معلوماتك! ابدأ الآن وابدأ في جني الأموال.
+              </Text>
+              <TouchableOpacity
+                style={styles.infoButton}
+                onPress={() => navigation.navigate("TeacherSettingsScreen")}
+              >
+                <Text style={styles.infoButtonText}>أكمل معلوماتك</Text>
+              </TouchableOpacity>
+            </>
+          ) : !hasAvailability ? (
+            <>
+              <Text style={styles.infoText}>
+                لم تقم بإضافة أوقات متاحة للحجز. أضف أوقات وابدأ في جني الأموال!
+              </Text>
+              <TouchableOpacity
+                style={styles.infoButton}
+                onPress={() => navigation.navigate("TeacherAvailability")}
+              >
+                <Text style={styles.infoButtonText}>إضافة أوقات الحجز</Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
+        </View>
+      )}
     </View>
   );
 };
-// account-cash-outline
 
-//
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    paddingHorizontal: 15,
-  },
-
-  tabsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  commingLessonsCont: {
-    backgroundColor: "#ffffff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f2",
-  },
-  comingLessonsText: {
-    textAlign: "right",
-    fontFamily: "Cairo",
-    fontWeight: "bold",
-  },
-  greeting: {
-    color: "#031417",
-    fontSize: 16,
-    marginBottom: 2,
-    textAlign: "right",
-    writingDirection: "rtl",
-    fontFamily: "Cairo",
-    fontWeight: "700",
-  },
-
-  header: {
-    padding: 10,
-    alignItems: "center",
+  mainContainer: { flex: 1, backgroundColor: "#f5f5f5", paddingHorizontal: 15 },
+  headerContainer: {
     backgroundColor: "#fff",
+    marginVertical: 10,
     borderRadius: 10,
-    marginBottom: 10,
-  },
-  balanceText: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#031417",
-
-    fontFamily: "Cairo",
-  },
-  transferButton: {
-    backgroundColor: "#009dff",
-    width: "100%",
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  transferButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontFamily: "Cairo",
+    padding: 10,
   },
   greetingRow: {
     flexDirection: "row",
@@ -248,15 +243,56 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     borderWidth: 2,
     borderColor: "#009dff",
-    borderWidth: 2,
+  },
+  greeting: {
+    color: "#031417",
+    fontSize: 16,
+    textAlign: "right",
+    fontFamily: "Cairo",
+    fontWeight: "700",
   },
   subTitle: {
     fontSize: 13,
     color: "#009dff",
     marginBottom: 20,
     textAlign: "right",
-    writingDirection: "rtl",
-    fontWeight: "normal",
+    fontFamily: "Cairo",
+  },
+  section: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+  },
+  comingLessonsText: {
+    fontFamily: "Cairo",
+    fontWeight: "bold",
+    textAlign: "right",
+    marginBottom: 5,
+  },
+  infoBox: {
+    marginTop: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: "#e5e5e5",
+  },
+  infoText: {
+    fontFamily: "Cairo",
+    textAlign: "center",
+    fontSize: 14,
+    color: "#031417",
+    marginBottom: 10,
+  },
+  infoButton: {
+    backgroundColor: "#009dff",
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  infoButtonText: {
+    color: "#fff",
+    fontSize: 16,
     fontFamily: "Cairo",
   },
 });

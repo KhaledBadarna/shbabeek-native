@@ -56,6 +56,10 @@ const NameImageModal = ({ visible, onClose }) => {
         setInfoText("يرجى إدخال الاسم على الأقل للاستمرار!");
         setInfoVisible(true);
         return;
+      } else if (/\d/.test(name.trim())) {
+        setInfoText("❌ الاسم لا يمكن أن يحتوي على أرقام!");
+        setInfoVisible(true);
+        return;
       }
     }
 
@@ -66,6 +70,10 @@ const NameImageModal = ({ visible, onClose }) => {
         return;
       } else if (!name.trim()) {
         setInfoText("يرجى إدخال الاسم للاستمرار!");
+        setInfoVisible(true);
+        return;
+      } else if (/\d/.test(name.trim())) {
+        setInfoText("❌ الاسم لا يمكن أن يحتوي على أرقام!");
         setInfoVisible(true);
         return;
       } else if (!imageUri) {

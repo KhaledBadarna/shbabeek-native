@@ -23,7 +23,6 @@ import {
 } from "firebase/firestore";
 import AuthModal from "../../components/modals/AuthModal";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import ProfitsScreen from "../teacher/ProfitsScreen";
 import * as ImagePicker from "expo-image-picker";
 
 const StudentProfileScreen = () => {
