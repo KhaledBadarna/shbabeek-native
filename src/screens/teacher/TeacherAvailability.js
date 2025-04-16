@@ -13,7 +13,7 @@ import SlotList from "../../components/SlotList";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../../firebase";
 import { useSelector } from "react-redux";
-
+import InfoModal from "../../components/modals/InfoModal";
 const arabicDays = [
   "الأحد",
   "الاثنين",
@@ -39,7 +39,8 @@ const TeacherAvailability = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isTimeValid, setIsTimeValid] = useState(true);
   const teacherId = useSelector((state) => state.user.userId);
-  console.log("slots", slots);
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [infoText, setInfoText] = useState("");
   useEffect(() => {
     const fetchTeacherAvailability = async () => {
       try {
@@ -117,12 +118,15 @@ const TeacherAvailability = () => {
 
   const addSlot = () => {
     if (!time || !validateTime(time)) {
-      alert("❌ لا يمكن إضافة أوقات بين 00:00 و 06:59.");
+      setInfoText("❌ لا يمكن إضافة أوقات بين 00:00 و 06:59.");
+      setInfoVisible(true);
       return;
     }
 
     if (!selectedDate) {
-      alert("❌ يرجى اختيار يوم قبل إضافة وقت! ❌");
+      setInfoText("❌ يرجى اختيار يوم قبل إضافة وقت! ❌");
+      setInfoVisible(true);
+
       return;
     }
 
@@ -136,7 +140,8 @@ const TeacherAvailability = () => {
     );
 
     if (isOverlap) {
-      alert("❌ الوقت يتداخل مع وقت آخر، الرجاء اختيار وقت آخر.");
+      setInfoText("❌ الوقت يتداخل مع وقت آخر، الرجاء اختيار وقت آخر.");
+      setInfoVisible(true);
       return;
     }
 
@@ -225,6 +230,11 @@ const TeacherAvailability = () => {
           </TouchableOpacity>
         </View>
       </View>
+      <InfoModal
+        isVisible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        message={infoText}
+      />
     </KeyboardAvoidingView>
   );
 };

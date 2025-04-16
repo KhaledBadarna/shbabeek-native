@@ -26,6 +26,7 @@ import NameImageModal from "../NameImageModal";
 import { registerForPushNotificationsAsync } from "../../utils/notifications/registerForPushNotifications";
 import fetchLessons from "../../utils/fetchLessons";
 import Modal from "react-native-modal";
+import InfoModal from "./InfoModal";
 const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const dispatch = useDispatch();
   const [step, setStep] = useState("register");
@@ -37,7 +38,8 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const phoneInputRef = useRef(null);
   const otpInputs = useRef([]);
   const { userId, userType } = useSelector((state) => state.user);
-
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [infoText, setInfoText] = useState("");
   useEffect(() => {
     if (visible) {
       setStep("register");
@@ -65,7 +67,8 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
 
   const handlePhoneSubmit = () => {
     if (!phone.trim()) {
-      alert("يرجى إدخال رقم الهاتف");
+      setInfoText("يرجى إدخال رقم الهاتف");
+      setInfoVisible(true);
       return;
     }
     setStep("otp");
@@ -210,10 +213,12 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
 
   const handleUpdateName = async () => {
     if (!name.trim()) {
-      alert("يرجى إدخال اسم صحيح");
+      setInfoText("يرجى إدخال اسم صحيح");
+      setInfoVisible(true);
       return;
     } else if (/\d/.test(name.trim())) {
-      alert("❌ الاسم لا يمكن أن يحتوي على أرقام!");
+      setInfoText("❌ الاسم لا يمكن أن يحتوي على أرقام!");
+      setInfoVisible(true);
       return;
     }
 
@@ -375,6 +380,11 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
           setShowNameImageModal(false);
           onClose(); // close auth modal too
         }}
+      />
+      <InfoModal
+        isVisible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        message={infoText}
       />
     </Modal>
   );

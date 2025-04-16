@@ -24,7 +24,7 @@ import {
 import AuthModal from "../../components/modals/AuthModal";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
-
+import InfoModal from "../../components/modals/InfoModal";
 const StudentProfileScreen = () => {
   const image = useSelector((state) => state.user.profileImage);
   const [profileImage, setProfileImage] = useState(image);
@@ -33,6 +33,7 @@ const StudentProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { name, phone, userId, userType } = useSelector((state) => state.user);
+  const [infoVisible, setInfoVisible] = useState(false);
 
   const handleLogout = () => {
     dispatch(resetFavorites()); // ✅ Clear favorites on logout
@@ -126,8 +127,7 @@ const StudentProfileScreen = () => {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        console.log("⚠️ Phone number already exists!"); // 🔥 Changed from console.error() to console.log()
-        alert("⚠️ رقم الهاتف مستخدم بالفعل. الرجاء استخدام رقم آخر.");
+        setInfoVisible(true);
         return; // ❌ Stop the update if phone already exists
       }
 
@@ -269,6 +269,11 @@ const StudentProfileScreen = () => {
         userType={userType}
         profileImage={profileImage}
         phoneNumber={phone}
+      />
+      <InfoModal
+        isVisible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        message={"⚠️ رقم الهاتف مستخدم بالفعل. الرجاء استخدام رقم آخر."}
       />
     </View>
   );

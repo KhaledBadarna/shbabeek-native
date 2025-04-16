@@ -13,6 +13,7 @@ import { handleBooking } from "../../utils/handleBooking";
 import { useSelector, useDispatch } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import PaymentMethodModal from "../../components/modals/PaymentMethodModal";
+
 const BookingScreen = ({ route }) => {
   const { selectedSlot, selectedDate, topicName, teacherId, teacher } =
     route.params; // ✅ Get params from navigation
@@ -64,9 +65,11 @@ const BookingScreen = ({ route }) => {
       );
 
       if (result.success === false && result.reason === "conflict") {
-        alert(
+        setInfoText(
           "⚠️ لقد قمت بالفعل بحجز درس في هذا الوقت. الرجاء اختيار وقت آخر."
         );
+        setInfoVisible(true);
+
         return;
       }
 
@@ -74,7 +77,9 @@ const BookingScreen = ({ route }) => {
       setShowSuccessMessage(true);
     } catch (error) {
       console.error("❌ Unexpected error:", error);
-      alert("حدث خطأ أثناء حجز الدرس. حاول مرة أخرى.");
+
+      setInfoText("حدث خطأ أثناء حجز الدرس. حاول مرة أخرى.");
+      setInfoVisible(true);
     }
   };
 
