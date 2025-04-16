@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   filterContainer: {
-    backgroundColor: "#f3f3f3",
+    backgroundColor: "#fbfbfb",
   },
   listContainer: {
     paddingBottom: 100,

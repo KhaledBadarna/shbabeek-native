@@ -28,7 +28,7 @@ const StudentLessonsScreen = () => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ backgroundColor: "#fff", padding: 10, borderRadius: 10 }}>
         <WeeklyDateSelector
           selectedDate={selectedDate}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import TeacherCard from "../../components/TeacherCard";
 import { useSelector } from "react-redux";
 import { firestore } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
-
+import { useFocusEffect } from "@react-navigation/native";
 const StudentHomeScreen = ({ navigation }) => {
   const { name, userId, isLoggedIn, profileImage } = useSelector(
     (state) => state.user
@@ -19,7 +19,17 @@ const StudentHomeScreen = ({ navigation }) => {
   const { favorites } = useSelector((state) => state.favorites);
 
   const [teachersData, setTeachersData] = useState([]);
+  const flatListRef = useRef(null);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (flatListRef.current) {
+        setTimeout(() => {
+          flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+        }, 100);
+      }
+    }, [teachersData])
+  );
   const handleTeacherPress = (teacher, teacherId) => {
     navigation.navigate("صفحة المعلم", {
       teacher: teacher,
@@ -27,7 +37,7 @@ const StudentHomeScreen = ({ navigation }) => {
       topicName: teacher.topics[0],
     });
   };
-  console.log("🧠 Redux profileImage:", profileImage);
+
   useEffect(() => {
     const fetchTeachersData = async () => {
       if (favorites.length > 0) {
@@ -146,6 +156,7 @@ const StudentHomeScreen = ({ navigation }) => {
   return (
     <FlatList
       style={styles.container}
+      showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <>
           <View
@@ -153,7 +164,7 @@ const StudentHomeScreen = ({ navigation }) => {
               backgroundColor: "#ffffff",
               marginBottom: 10,
               borderRadius: 10,
-              padding: 10,
+              padding: 20,
             }}
           >
             <View style={styles.greetingRow}>
@@ -200,11 +211,11 @@ const StudentHomeScreen = ({ navigation }) => {
             ) : (
               <FlatList
                 horizontal
-                data={teachersData}
+                inverted
+                data={[...teachersData].reverse()} // ← reverse the data so first item still shows on right
                 keyExtractor={(item, index) => item.id || index.toString()}
                 renderItem={renderTeacher}
                 showsHorizontalScrollIndicator={false}
-                // contentContainerStyle={{ gap: -20 }}
               />
             )}
           </View>
@@ -219,6 +230,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
     backgroundColor: "#F6F6F6",
+    padding: 10,
   },
   greetingRow: {
     flexDirection: "row",
@@ -246,13 +258,14 @@ const styles = StyleSheet.create({
   topicsContainer: {
     backgroundColor: "#fff",
     borderRadius: 10,
+    padding: 10,
   },
 
   teachersContainer: {
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 10,
-    margin: 10,
+    marginTop: 10,
   },
   sectionTitle: {
     fontSize: 16,
