@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Modal,
   View,
   Text,
   TextInput,
@@ -26,6 +25,7 @@ import {
 import NameImageModal from "../NameImageModal";
 import { registerForPushNotificationsAsync } from "../../utils/notifications/registerForPushNotifications";
 import fetchLessons from "../../utils/fetchLessons";
+import Modal from "react-native-modal";
 const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const dispatch = useDispatch();
   const [step, setStep] = useState("register");
@@ -273,126 +273,118 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
 
   return (
     <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
+      isVisible={visible}
+      onBackdropPress={onClose}
+      animationIn="slideInUp"
+      animationOut="slideOutUp"
+      backdropColor="#000"
+      backdropOpacity={0.5}
+      useNativeDriver
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeText}>×</Text>
-          </TouchableOpacity>
-          {mode === "updateName" || step === "updateName" ? (
-            <>
-              <Text style={styles.title}>تحديث الاسم</Text>
-              <TextInput
-                textAlign="right"
-                placeholder="أدخل الاسم الجديد"
-                style={styles.input}
-                placeholderTextColor="#999"
-                value={name}
-                onChangeText={setName}
-              />
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={handleUpdateName}
-              >
-                <Text style={styles.confirmButtonText}>تحديث</Text>
+      <View style={styles.modalContent}>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeText}>×</Text>
+        </TouchableOpacity>
+        {mode === "updateName" || step === "updateName" ? (
+          <>
+            <Text style={styles.title}>تحديث الاسم</Text>
+            <TextInput
+              textAlign="right"
+              placeholder="أدخل الاسم الجديد"
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={name}
+              onChangeText={setName}
+            />
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleUpdateName}
+            >
+              <Text style={styles.confirmButtonText}>تحديث</Text>
+            </TouchableOpacity>
+          </>
+        ) : step === "register" ? (
+          <>
+            <Text style={styles.title}>
+              {mode === "updatePhone" ? "تحديث رقم الهاتف" : "تسجيل الدخول"}
+            </Text>
+            <TextInput
+              ref={phoneInputRef}
+              textAlign="right"
+              placeholder="رقم الهاتف"
+              style={styles.input}
+              keyboardType="phone-pad"
+              placeholderTextColor="#999"
+              value={phone}
+              onChangeText={handlePhoneChange} // ✅ Format input dynamically
+            />
+            {mode === "auth" && (
+              <TouchableOpacity onPress={toggleRole}>
+                <Text style={styles.roleToggleText}>
+                  {role === "student"
+                    ? "اضغط للدخول كمعلم"
+                    : "اضغط للدخول كطالب"}
+                </Text>
               </TouchableOpacity>
-            </>
-          ) : step === "register" ? (
-            <>
-              <Text style={styles.title}>
-                {mode === "updatePhone" ? "تحديث رقم الهاتف" : "تسجيل الدخول"}
-              </Text>
-              <TextInput
-                ref={phoneInputRef}
-                textAlign="right"
-                placeholder="رقم الهاتف"
-                style={styles.input}
-                keyboardType="phone-pad"
-                placeholderTextColor="#999"
-                value={phone}
-                onChangeText={handlePhoneChange} // ✅ Format input dynamically
-              />
-              {mode === "auth" && (
-                <TouchableOpacity onPress={toggleRole}>
-                  <Text style={styles.roleToggleText}>
-                    {role === "student"
-                      ? "اضغط للدخول كمعلم"
-                      : "اضغط للدخول كطالب"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={handlePhoneSubmit}
-              >
-                <Text style={styles.confirmButtonText}>التالي</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <Text style={styles.title}>تأكيد رقم الهاتف</Text>
-              <Text style={styles.subtitle}>
-                أدخل رمز التحقق المرسل إلى {"\u200E"}
-                {phone}
-              </Text>
-              <View style={styles.otpContainer}>
-                {otp.map((digit, index) => (
-                  <TextInput
-                    key={index}
-                    ref={(el) => (otpInputs.current[index] = el)}
-                    style={styles.otpInput}
-                    keyboardType="number-pad"
-                    maxLength={1}
-                    value={digit}
-                    onChangeText={(text) => {
-                      const newOtp = [...otp];
-                      newOtp[index] = text;
-                      setOtp(newOtp);
-                      if (text && index < 3)
-                        otpInputs.current[index + 1]?.focus();
-                    }}
-                  />
-                ))}
-              </View>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={confirmOtp}
-              >
-                <Text style={styles.confirmButtonText}>تأكيد</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-        <NameImageModal
-          visible={showNameImageModal}
-          onClose={() => {
-            setShowNameImageModal(false);
-            onClose(); // close auth modal too
-          }}
-        />
+            )}
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handlePhoneSubmit}
+            >
+              <Text style={styles.confirmButtonText}>التالي</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text style={styles.title}>تأكيد رقم الهاتف</Text>
+            <Text style={styles.subtitle}>
+              أدخل رمز التحقق المرسل إلى {"\u200E"}
+              {phone}
+            </Text>
+            <View style={styles.otpContainer}>
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(el) => (otpInputs.current[index] = el)}
+                  style={styles.otpInput}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  value={digit}
+                  onChangeText={(text) => {
+                    const newOtp = [...otp];
+                    newOtp[index] = text;
+                    setOtp(newOtp);
+                    if (text && index < 3)
+                      otpInputs.current[index + 1]?.focus();
+                  }}
+                />
+              ))}
+            </View>
+            <TouchableOpacity style={styles.confirmButton} onPress={confirmOtp}>
+              <Text style={styles.confirmButtonText}>تأكيد</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
+      <NameImageModal
+        visible={showNameImageModal}
+        onClose={() => {
+          setShowNameImageModal(false);
+          onClose(); // close auth modal too
+        }}
+      />
     </Modal>
   );
 };
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   modalContent: {
-    width: "90%",
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 20,
     alignItems: "center",
     position: "relative",
   },
+
   closeButton: {
     position: "absolute",
     top: 10,

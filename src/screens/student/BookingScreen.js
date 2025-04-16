@@ -8,6 +8,7 @@ import {
   Image,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import InfoModal from "../../components/modals/InfoModal";
 import { handleBooking } from "../../utils/handleBooking";
 import { useSelector, useDispatch } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -16,15 +17,20 @@ const BookingScreen = ({ route }) => {
   const { selectedSlot, selectedDate, topicName, teacherId, teacher } =
     route.params; // ✅ Get params from navigation
 
-  const [message, setMessage] = useState(""); // Student's message
   const [fileAttached, setFileAttached] = useState(null); // Store attached file
   const [selectedTopic, setSelectedTopic] = useState(""); // Store selected topic
   const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Show success message
   const [openPaymentMEthod, setOpenPaymentMethod] = useState(false);
   const studentId = useSelector((state) => state.user.userId); // Redux: Get student ID
+  const basePrice = parseFloat(teacher.pricePerHour) || 0;
+  const studentFee = parseFloat((basePrice * 0.03).toFixed(2)); // 3%
+  const totalPrice = parseFloat((basePrice + studentFee).toFixed(2));
   const defaultPaymentMethod = useSelector(
     (state) => state.user.defaultPaymentMethod
   ); // Redux: Get student ID
+
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [infoText, setInfoText] = useState("");
 
   const scrollViewRef = useRef(null); // Create a reference to the ScrollView
   const dispatch = useDispatch();
@@ -51,7 +57,7 @@ const BookingScreen = ({ route }) => {
         selectedSlot,
         selectedDate,
         studentId,
-        message,
+
         fileAttached,
         selectedTopic,
         dispatch
@@ -264,7 +270,7 @@ const BookingScreen = ({ route }) => {
                     color: "#031417",
                   }}
                 >
-                  1.13 ₪
+                  {studentFee} ₪
                 </Text>
                 <Text
                   style={{
@@ -274,7 +280,24 @@ const BookingScreen = ({ route }) => {
                   }}
                 >
                   رسوم اضافية
+                  <TouchableOpacity
+                    onPress={() => {
+                      setInfoText("رسوم إضافية بنسبة 3% تشمل خدمات التطبيق.");
+                      setInfoVisible(true);
+                    }}
+                  >
+                    <Icon
+                      name="help-circle-outline"
+                      size={18}
+                      color="#353535"
+                    />
+                  </TouchableOpacity>
                 </Text>
+                <InfoModal
+                  isVisible={infoVisible}
+                  onClose={() => setInfoVisible(false)}
+                  message={infoText}
+                />
               </View>
             </View>
             <View
@@ -294,7 +317,7 @@ const BookingScreen = ({ route }) => {
                   fontWeight: "700",
                 }}
               >
-                101.13 ₪
+                {totalPrice}
               </Text>
               <Text
                 style={{

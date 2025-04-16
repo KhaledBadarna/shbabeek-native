@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
+import InfoModal from "./modals/InfoModal";
 import { useSelector, useDispatch } from "react-redux";
 import { firestore } from "../firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
@@ -23,7 +23,8 @@ const NameImageModal = ({ visible, onClose }) => {
   const { userId, userType: role } = useSelector((state) => state.user);
   const [name, setName] = useState("");
   const [imageUri, setImageUri] = useState(null);
-
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [infoText, setInfoText] = useState("");
   useEffect(() => {
     if (!visible) {
       setName("");
@@ -50,14 +51,28 @@ const NameImageModal = ({ visible, onClose }) => {
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      Alert.alert("خطأ", "يرجى إدخال الاسم");
-      return;
+    if (role === "student") {
+      if (!name.trim()) {
+        setInfoText("يرجى إدخال الاسم على الأقل للاستمرار!");
+        setInfoVisible(true);
+        return;
+      }
     }
 
-    if (role === "teacher" && !imageUri) {
-      Alert.alert("خطأ", "يرجى اختيار صورة للملف الشخصي (إجباري للمعلمين)");
-      return;
+    if (role === "teacher") {
+      if (!name.trim() && !imageUri) {
+        setInfoText("يرجى إدخال الاسم والصورة الشخصية للاستمرار!");
+        setInfoVisible(true);
+        return;
+      } else if (!name.trim()) {
+        setInfoText("يرجى إدخال الاسم للاستمرار!");
+        setInfoVisible(true);
+        return;
+      } else if (!imageUri) {
+        setInfoText("يرجى تحميل صورة شخصية للاستمرار!");
+        setInfoVisible(true);
+        return;
+      }
     }
 
     try {
@@ -129,6 +144,11 @@ const NameImageModal = ({ visible, onClose }) => {
             <Text style={styles.saveButtonText}>حفظ</Text>
           </TouchableOpacity>
         </View>
+        <InfoModal
+          isVisible={infoVisible}
+          onClose={() => setInfoVisible(false)}
+          message={infoText}
+        />
       </View>
     </Modal>
   );

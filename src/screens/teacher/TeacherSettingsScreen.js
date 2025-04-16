@@ -19,7 +19,7 @@ import { useNavigation, useRoute } from "@react-navigation/native"; // Import Na
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useDispatch } from "react-redux";
 import { setTeacherData } from "../../redux/slices/teacherSlice"; // ✅ if not already imported
-
+import InfoModal from "../../components/modals/InfoModal";
 const TeacherSettingsScreen = () => {
   const navigation = useNavigation(); // Initialize navigation
   const route = useRoute(); // Initialize navigation
@@ -35,7 +35,8 @@ const TeacherSettingsScreen = () => {
   const teacherData = useSelector((state) => state.teacher); // ✅ Get teacher data from Redux
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [bankDetails, setBankDetails] = useState({}); // Store teacher's bio
-
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [infoText, setInfoText] = useState("");
   useEffect(() => {
     if (teacherData) {
       setBio(teacherData.bio);
@@ -47,11 +48,26 @@ const TeacherSettingsScreen = () => {
   }, [teacherData]); // ✅ Only update when teacherData changes
 
   const handleSave = async () => {
-    setIsSaving(true);
+    // Validation: check all required fields
+    if (
+      !bio.trim() ||
+      !price.trim() ||
+      selectedTopics.length === 0 ||
+      selectedStages.length === 0 ||
+      !bankDetails?.fullName ||
+      !bankDetails?.bankNumber ||
+      !bankDetails?.branchBank ||
+      !bankDetails?.accountNumber
+    ) {
+      setInfoText("يرجى ملئ جميع التفاصيل");
+      setInfoVisible(true);
 
+      return;
+    }
+
+    setIsSaving(true);
     try {
       const teacherDocRef = doc(firestore, "teachers", userId);
-
       const teacherData = {
         bio,
         pricePerHour: price,
@@ -61,14 +77,8 @@ const TeacherSettingsScreen = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      console.log("📤 Final Data Being Saved to Firestore:", teacherData);
-
       await setDoc(teacherDocRef, teacherData, { merge: true });
-
-      // ✅ DISPATCH UPDATED DATA TO REDUX
       dispatch(setTeacherData({ ...teacherData }));
-
-      console.log("✅ Teacher data saved and Redux updated!");
       setHasChanges(false);
     } catch (error) {
       console.error("❌ Error saving teacher data:", error);
@@ -295,6 +305,11 @@ const TeacherSettingsScreen = () => {
           </View>
         </TouchableOpacity>
       </View>
+      <InfoModal
+        isVisible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        message={infoText}
+      />
     </View>
   );
 };

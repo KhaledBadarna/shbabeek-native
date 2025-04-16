@@ -12,13 +12,13 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../firebase";
 import AuthModal from "./modals/AuthModal"; // ✅ Use AuthModal instead of two modals
-
+import InfoModal from "./modals/InfoModal";
 const FavoriteIcon = ({ teacherId }) => {
   const { isLoggedIn, userId } = useSelector((state) => state.user);
   const { favorites } = useSelector((state) => state.favorites);
   const dispatch = useDispatch();
   const [showAuthModal, setShowAuthModal] = useState(false);
-
+  const [infoVisible, setInfoVisible] = useState(false);
   const isFavorite = favorites.includes(teacherId);
 
   const handleFavoritePress = async () => {
@@ -46,7 +46,7 @@ const FavoriteIcon = ({ teacherId }) => {
             });
             dispatch(addFavorite(teacherId));
           } else {
-            alert("You can only have up to 10 favorite teachers.");
+            setInfoVisible(true);
           }
         } else {
           await updateDoc(studentRef, {
@@ -74,6 +74,11 @@ const FavoriteIcon = ({ teacherId }) => {
       <AuthModal
         visible={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+      />
+      <InfoModal
+        isVisible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        message={"للاسف، تستطيع اضافة 10 معلمين فقط كاقصى حد"}
       />
     </>
   );
