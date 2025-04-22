@@ -54,7 +54,7 @@ const LessonsCard = ({ lessons = [] }) => {
               </Text>
               <Icon name="clock-time-ten-outline" size={20} color="#031417" />
             </View>
-            {console.log(item)}
+
             <TouchableOpacity
               style={styles.enterLessonButton}
               onPress={() =>

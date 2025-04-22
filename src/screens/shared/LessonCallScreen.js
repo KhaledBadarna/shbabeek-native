@@ -15,12 +15,13 @@ import {
   VideoRenderModeType,
 } from "react-native-agora";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { WebView } from "react-native-webview";
 
 const APP_ID = "15ef0849bb20486ba1a533f2e976d7fc";
 const CHANNEL_NAME = "lesson123";
 const TOKEN = null;
 const UID = 0;
-const LESSON_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const LESSON_DURATION = 60 * 60 * 1000;
 
 const LessonCallScreen = ({ navigation }) => {
   const [engine] = useState(() => createAgoraRtcEngine());
@@ -45,7 +46,7 @@ const LessonCallScreen = ({ navigation }) => {
         startTimer();
       },
       onUserJoined: (connection, uid) => setRemoteUid(uid),
-      onUserOffline: (connection, uid) => setRemoteUid(null),
+      onUserOffline: () => setRemoteUid(null),
     });
 
     engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
@@ -105,20 +106,33 @@ const LessonCallScreen = ({ navigation }) => {
     stopTimer();
     navigation.goBack();
   };
-
+  const uri = `http://192.168.1.7:5173/?board=${CHANNEL_NAME}`;
+  console.log("uri", uri);
   return (
     <View style={styles.container}>
-      {joined && camOn && (
-        <RtcSurfaceView canvas={{ uid: 0 }} style={styles.fullScreen} />
-      )}
+      <WebView
+        source={{ uri: `http://192.168.1.7:5173/?board=${CHANNEL_NAME}` }}
+        style={{ flex: 1 }}
+        javaScriptEnabled
+        domStorageEnabled
+      />
+      {/* Remote user full screen */}
       {joined && remoteUid !== null && (
         <RtcSurfaceView
           canvas={{ uid: remoteUid }}
-          style={styles.remote}
+          style={StyleSheet.absoluteFill}
           renderMode={VideoRenderModeType.VideoRenderModeHidden}
         />
       )}
 
+      {/* Local user camera (1/4 screen floating) */}
+      {joined && camOn && (
+        <View style={styles.cameraOverlay}>
+          <RtcSurfaceView canvas={{ uid: 0 }} style={{ flex: 1 }} />
+        </View>
+      )}
+
+      {/* Controls */}
       <View style={styles.controls}>
         <Text style={styles.timer}>{formatTime(timeLeft)}</Text>
         <TouchableOpacity onPress={toggleMic} style={styles.controlButton}>
@@ -144,14 +158,16 @@ const LessonCallScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-  fullScreen: { flex: 1 },
-  remote: {
-    width: 120,
-    height: 160,
+  cameraOverlay: {
     position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#222",
+    top: 20,
+    right: 20,
+    width: "25%",
+    aspectRatio: 3 / 4,
+    backgroundColor: "#000",
+    borderRadius: 16,
+    overflow: "hidden",
+    zIndex: 20,
   },
   controls: {
     position: "absolute",
@@ -161,6 +177,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 20,
+    zIndex: 30,
   },
   controlButton: {
     backgroundColor: "#333",
@@ -171,6 +188,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     marginRight: 10,
+  },
+  remote: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000",
   },
 });
 
