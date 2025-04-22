@@ -178,7 +178,10 @@ const BookingScreen = ({ route }) => {
                   color: "#031417",
                 }}
               >
-                {teacher.name}
+                {(() => {
+                  const [first, last = ""] = (teacher.name || "").split(" ");
+                  return `${first} ${last.charAt(0)}.`.trim();
+                })()}
               </Text>
             </View>
 

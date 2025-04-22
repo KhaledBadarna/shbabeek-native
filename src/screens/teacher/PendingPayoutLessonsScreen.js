@@ -45,7 +45,7 @@ const PendingPayoutLessonsScreen = () => {
         </Text>
         <Text style={styles.topic}>{item.selectedTopic}</Text>
       </View>
-      <Text style={styles.price}>{item.paidAmount || "??"} ₪</Text>
+      <Text style={styles.price}>{Math.round(item.paidAmount * 0.93)} ₪</Text>
     </View>
   );
 

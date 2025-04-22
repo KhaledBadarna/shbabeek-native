@@ -15,15 +15,17 @@ import {
   VideoRenderModeType,
 } from "react-native-agora";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { WebView } from "react-native-webview";
-
+// import { WebView } from "react-native-webview";
+import handleLessonEnd from "../../utils/handleLessonEnd";
 const APP_ID = "15ef0849bb20486ba1a533f2e976d7fc";
 const CHANNEL_NAME = "lesson123";
 const TOKEN = null;
 const UID = 0;
 const LESSON_DURATION = 60 * 60 * 1000;
 
-const LessonCallScreen = ({ navigation }) => {
+const LessonCallScreen = ({ navigation, route }) => {
+  const { lessonId, teacherId, paidAmount, oppositeUser, roomName } =
+    route.params;
   const [engine] = useState(() => createAgoraRtcEngine());
   const [joined, setJoined] = useState(false);
   const [remoteUid, setRemoteUid] = useState(null);
@@ -42,7 +44,6 @@ const LessonCallScreen = ({ navigation }) => {
 
     engine.registerEventHandler({
       onJoinChannelSuccess: () => {
-        setJoined(true);
         startTimer();
       },
       onUserJoined: (connection, uid) => setRemoteUid(uid),
@@ -59,7 +60,11 @@ const LessonCallScreen = ({ navigation }) => {
       engine.release();
     };
   }, []);
-
+  useEffect(() => {
+    if (joined) {
+      startTimer();
+    }
+  }, [joined]);
   const requestPermissions = async () => {
     await PermissionsAndroid.requestMultiple([
       PermissionsAndroid.PERMISSIONS.CAMERA,
@@ -100,22 +105,27 @@ const LessonCallScreen = ({ navigation }) => {
     engine.muteLocalVideoStream(camOn);
     setCamOn((prev) => !prev);
   };
-
-  const handleLeave = () => {
+  handleLeave = async () => {
+    // await handleLessonEnd(lessonId, teacherId, paidAmount, 0); // rating = 0
     engine.leaveChannel();
     stopTimer();
-    navigation.goBack();
+    navigation.navigate("Home", {
+      screen: "الرئيسية",
+      params: { showRating: true, lessonId, teacherId, paidAmount },
+    });
   };
-  const uri = `http://192.168.1.7:5173/?board=${CHANNEL_NAME}`;
-  console.log("uri", uri);
   return (
     <View style={styles.container}>
+      {/* 
+      ✅ Whiteboard shown in WebView (Disabled for now — for iPad use later)
       <WebView
         source={{ uri: `http://192.168.1.7:5173/?board=${CHANNEL_NAME}` }}
         style={{ flex: 1 }}
         javaScriptEnabled
         domStorageEnabled
       />
+      */}
+
       {/* Remote user full screen */}
       {joined && remoteUid !== null && (
         <RtcSurfaceView

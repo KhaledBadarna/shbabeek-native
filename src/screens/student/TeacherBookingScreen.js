@@ -28,20 +28,20 @@ const TeacherBookingScreen = ({ route, navigation }) => {
 
   // 👂 Fetch live slot updates from Firestore
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(firestore, "teacher_availability", teacherId),
-      (snapshot) => {
-        if (!snapshot.exists()) return;
+    if (!teacherId) return;
+
+    const ref = doc(firestore, "teacher_availability", teacherId);
+    const unsubscribe = onSnapshot(ref, (snapshot) => {
+      if (snapshot.exists()) {
         const slotsObj = snapshot.data().slots || {};
         const allSlots = Object.entries(slotsObj).flatMap(([day, slots]) =>
           slots.map((slot) => ({ ...slot, day }))
         );
-
-        setAvailableSlots(allSlots); // ✅ keep full data here
+        setAvailableSlots(allSlots);
       }
-    );
+    });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, [teacherId]);
 
   // 🧠 Convert selected ISO date to day name in Arabic

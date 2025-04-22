@@ -92,7 +92,7 @@ const CompletedLessonsScreen = () => {
         </Text>
         <Text style={styles.topic}>{item.selectedTopic}</Text>
       </View>
-      <Text style={styles.price}>{item.paidAmount || "??"} ₪</Text>
+      <Text style={styles.price}>{Math.round(item.paidAmount * 0.93)} ₪</Text>
     </View>
   );
 
@@ -121,13 +121,9 @@ const CompletedLessonsScreen = () => {
         ListFooterComponent={
           loadingMore ? (
             <ActivityIndicator style={{ marginVertical: 20 }} />
-          ) : allLoaded ? (
-            <Text style={styles.endText}>لا يوجد المزيد من الدروس</Text>
           ) : null
         }
-        ListEmptyComponent={
-          <Text style={styles.empty}>لا يوجد دروس مكتملة</Text>
-        }
+        ListEmptyComponent={<Text style={styles.empty}>لا يوجد ارباح </Text>}
       />
     </View>
   );

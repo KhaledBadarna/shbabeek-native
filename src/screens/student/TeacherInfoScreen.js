@@ -64,7 +64,12 @@ const TeacherInfoScreen = ({ route, navigation }) => {
             <FavoriteIcon teacherId={teacherId} />
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles.teacherName}>{teacher.name}</Text>
+            <Text style={styles.teacherName}>
+              {(() => {
+                const [first, last = ""] = teacher.name.trim().split(" ");
+                return `${first} ${last.charAt(0).toUpperCase()}.`;
+              })()}
+            </Text>
             <Image
               source={{ uri: teacher.profileImage }}
               style={styles.profileImage}

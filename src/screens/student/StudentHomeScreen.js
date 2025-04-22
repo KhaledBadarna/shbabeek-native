@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,9 @@ import TeacherCard from "../../components/TeacherCard";
 import { useSelector } from "react-redux";
 import { firestore } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
+import handleLessonEnd from "../../utils/handleLessonEnd";
+import RatingModal from "../../components/modals/RatingModal";
 const StudentHomeScreen = ({ navigation }) => {
   const { name, userId, isLoggedIn, profileImage } = useSelector(
     (state) => state.user
@@ -20,7 +22,9 @@ const StudentHomeScreen = ({ navigation }) => {
 
   const [teachersData, setTeachersData] = useState([]);
   const flatListRef = useRef(null);
-
+  const route = useRoute();
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingData, setRatingData] = useState(null);
   useFocusEffect(
     React.useCallback(() => {
       if (flatListRef.current) {
@@ -37,7 +41,21 @@ const StudentHomeScreen = ({ navigation }) => {
       topicName: teacher.topics[0],
     });
   };
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.showRating) {
+        setRatingData({
+          lessonId: route.params.lessonId,
+          teacherId: route.params.teacherId,
+          paidAmount: route.params.paidAmount,
+        });
+        setShowRatingModal(true);
 
+        // Clear params so it doesn't show again
+        navigation.setParams({ showRating: false });
+      }
+    }, [route.params])
+  );
   useEffect(() => {
     const fetchTeachersData = async () => {
       if (favorites.length > 0) {
@@ -219,6 +237,19 @@ const StudentHomeScreen = ({ navigation }) => {
               />
             )}
           </View>
+          <RatingModal
+            visible={showRatingModal}
+            onClose={() => setShowRatingModal(false)}
+            onSubmit={async (rating) => {
+              await handleLessonEnd(
+                ratingData.lessonId,
+                ratingData.teacherId,
+                ratingData.paidAmount, // ✅ real paidAmount, not 0
+                rating
+              );
+              setShowRatingModal(false);
+            }}
+          />
         </>
       }
     />

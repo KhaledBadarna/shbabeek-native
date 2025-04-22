@@ -10,10 +10,11 @@ import {
 } from "react-native";
 import WeeklyDateSelector from "../../components/WeeklyDateSelector";
 import SlotList from "../../components/SlotList";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { firestore } from "../../firebase";
 import { useSelector } from "react-redux";
 import InfoModal from "../../components/modals/InfoModal";
+
 const arabicDays = [
   "الأحد",
   "الاثنين",
@@ -42,21 +43,22 @@ const TeacherAvailability = () => {
   const [infoVisible, setInfoVisible] = useState(false);
   const [infoText, setInfoText] = useState("");
   useEffect(() => {
-    const fetchTeacherAvailability = async () => {
-      try {
-        if (!teacherId) return;
+    if (!teacherId) return;
 
-        const ref = doc(firestore, "teacher_availability", teacherId);
-        const snapshot = await getDoc(ref);
-        if (snapshot.exists()) {
-          setSlots(snapshot.data().slots || slots);
-        }
-      } catch (error) {
-        console.error("Error fetching availability:", error);
+    const ref = doc(firestore, "teacher_availability", teacherId);
+    const unsubscribe = onSnapshot(ref, (snapshot) => {
+      console.log("🔥 onSnapshot triggered for availability");
+
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        console.log("🧠 snapshot data:", data);
+        setSlots(data.slots || {});
+      } else {
+        console.log("❌ Document does not exist");
       }
-    };
+    });
 
-    fetchTeacherAvailability();
+    return () => unsubscribe();
   }, [teacherId]);
 
   const saveChanges = async () => {

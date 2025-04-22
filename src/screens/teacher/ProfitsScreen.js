@@ -1,23 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
+import { doc, onSnapshot } from "firebase/firestore";
+import { firestore } from "../../firebase";
 
 const ProfitsScreen = () => {
-  const { totalEarned, pendingPayout } = useSelector((state) => state.teacher);
+  const { userId } = useSelector((state) => state.user); // Get current teacher ID
   const navigation = useNavigation();
+
+  const [totalEarned, setTotalEarned] = useState(0);
+  const [pendingPayout, setPendingPayout] = useState(0);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const ref = doc(firestore, "teachers", userId);
+    const unsubscribe = onSnapshot(ref, (snapshot) => {
+      const data = snapshot.data();
+      setTotalEarned(data.totalEarned || 0);
+      setPendingPayout(data.pendingPayout || 0);
+    });
+
+    return unsubscribe;
+  }, [userId]);
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          backgroundColor: "#fff",
-          marginBottom: 10,
-          borderRadius: 10,
-          padding: 10,
-        }}
-      >
+      <View style={styles.noticeWrapper}>
         <Text style={styles.noticeText}>المبلغ الظاهر هو بعد خصم عمولة 7%</Text>
       </View>
 
@@ -43,16 +54,17 @@ const ProfitsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f6f6f6",
-    padding: 20,
+  container: { flex: 1, backgroundColor: "#f6f6f6", padding: 20 },
+  noticeWrapper: {
+    backgroundColor: "#fff",
+    marginBottom: 10,
+    borderRadius: 10,
+    padding: 10,
   },
   noticeText: {
     fontSize: 14,
     fontFamily: "Cairo",
     color: "#0e0d0d",
-    marginBottom: 15,
     textAlign: "center",
     fontWeight: "bold",
   },
@@ -68,9 +80,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  icon: {
-    marginBottom: 10,
-  },
+  icon: { marginBottom: 10 },
   label: {
     fontSize: 16,
     fontFamily: "Cairo",
