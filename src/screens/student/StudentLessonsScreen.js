@@ -20,7 +20,10 @@ const StudentLessonsScreen = () => {
   }, [userId, userType, dispatch]);
 
   const lessonsForDate = useMemo(() => {
-    return lessons.filter((lesson) => lesson.selectedDate === selectedDate);
+    return lessons.filter(
+      (lesson) =>
+        lesson.selectedDate === selectedDate && !lesson.isLessonCompleted
+    );
   }, [lessons, selectedDate]);
 
   if (loading) {
@@ -33,7 +36,7 @@ const StudentLessonsScreen = () => {
         <WeeklyDateSelector
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
-          availableSlots={lessons}
+          availableSlots={lessons.filter((lesson) => !lesson.isLessonCompleted)}
           type="lessons"
         />
 

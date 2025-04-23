@@ -156,7 +156,6 @@ const TeacherCard = ({
                         borderRightWidth: 1, // Add border between grades, not after the last one
                         borderRightColor: "#ccc", // Border color
                         paddingRight: 15, // Space after border
-                        marginRight: 5,
                       },
                     ]}
                   >
@@ -165,39 +164,51 @@ const TeacherCard = ({
                 )
               )}
             </View>
-            <View style={styles.detailItem}>
-              <Icon
-                style={[{ marginLeft: 5 }, styles.icons]}
-                name="bookshelf"
-                size={20}
-                color="#555"
-              />
-              <Text
-                style={{
-                  fontFamily: "Cairo",
-                  fontSize: 12,
-                  color: "#031417",
-                  fontWeight: "700",
-                }}
-              >
-                المواضيع:
-              </Text>
-              {(topics ? topics.split(",") : []).map((topic, index, arr) => (
+            <View style={styles.detailItemColumn}>
+              <View style={styles.topicsFirstRowWrapper}>
+                <Icon
+                  style={[{ marginLeft: 5 }, styles.icons]}
+                  name="bookshelf"
+                  size={20}
+                  color="#555"
+                />
                 <Text
-                  key={index}
-                  style={[
-                    styles.detailsText,
-                    {
-                      borderRightWidth: 1, // Add border between topics, not after the last one
-                      borderRightColor: "#ccc", // Border color
-                      paddingRight: 15, // Space after border
-                      marginRight: 5,
-                    },
-                  ]}
+                  style={{
+                    fontFamily: "Cairo",
+                    fontSize: 12,
+                    color: "#031417",
+                    fontWeight: "700",
+                  }}
                 >
-                  {topic.trim()}
+                  المواضيع:
                 </Text>
-              ))}
+                {
+                  // First 5 topics next to the label
+                  (topics ? topics.split(",").slice(0, 5) : []).map(
+                    (topic, i) => (
+                      <Text key={i} style={styles.topicText}>
+                        {topic.trim()}
+                      </Text>
+                    )
+                  )
+                }
+              </View>
+
+              {
+                // Second row (if needed)
+                topics?.split(",").length > 5 && (
+                  <View style={styles.topicsSecondRow}>
+                    {topics
+                      .split(",")
+                      .slice(5)
+                      .map((topic, i) => (
+                        <Text key={i} style={styles.topicText}>
+                          {topic.trim()}
+                        </Text>
+                      ))}
+                  </View>
+                )
+              }
             </View>
           </View>
         )}
@@ -285,6 +296,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 5,
     textAlign: "right",
+  },
+  detailItemColumn: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+
+  topicsFirstRowWrapper: {
+    flexDirection: "row-reverse",
+    flexWrap: "nowrap",
+    alignItems: "center",
+    width: "100%",
+  },
+
+  topicsSecondRow: {
+    flexDirection: "row-reverse",
+    flexWrap: "nowrap",
+    alignSelf: "flex-end", // ✅ push the row to the right side
+  },
+
+  topicText: {
+    fontSize: 12,
+    color: "#666",
+    fontFamily: "Cairo",
+    textAlign: "right",
+    paddingRight: 10,
+    borderRightWidth: 1,
+    borderRightColor: "#ccc",
   },
 });
 

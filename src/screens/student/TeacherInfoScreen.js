@@ -25,7 +25,11 @@ const TeacherInfoScreen = ({ route, navigation }) => {
   const thumbnailUrl = `https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg`;
   navigation = useNavigation();
   const handlePlay = () => setIsPlaying(true);
-  console.log(teacher, teacherId);
+  const splitTopics = (topics = []) => {
+    const firstRow = topics.slice(0, 5);
+    const secondRow = topics.slice(5);
+    return [firstRow, secondRow];
+  };
   return (
     <View style={styles.container}>
       {/* Main Content */}
@@ -109,10 +113,16 @@ const TeacherInfoScreen = ({ route, navigation }) => {
               justifyContent: "space-between",
             }}
           >
-            <Icon name="school-outline" size={30} color="#555" />
+            <Icon name="school-outline" size={20} color="#555" />
             <Text style={styles.sectionTitle}>المراحل</Text>
           </View>
-          <View style={styles.topicsContainer}>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+            }}
+          >
             {teacher.stages?.map((stage, index) => (
               <Text key={index} style={styles.topicText}>
                 {stage}
@@ -130,14 +140,18 @@ const TeacherInfoScreen = ({ route, navigation }) => {
               justifyContent: "space-between",
             }}
           >
-            <Icon name="bookshelf" size={30} color="#555" />
+            <Icon name="bookshelf" size={20} color="#555" />
             <Text style={styles.sectionTitle}>المواضيع</Text>
           </View>
           <View style={styles.topicsContainer}>
-            {teacher.topics?.map((topic, index) => (
-              <Text key={index} style={styles.topicText}>
-                {topic}
-              </Text>
+            {splitTopics(teacher.topics).map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.topicRow}>
+                {row.map((topic, index) => (
+                  <Text key={index} style={styles.topicText}>
+                    {topic}
+                  </Text>
+                ))}
+              </View>
             ))}
           </View>
         </View>
@@ -151,7 +165,7 @@ const TeacherInfoScreen = ({ route, navigation }) => {
               justifyContent: "space-between",
             }}
           >
-            <Icon name="card-account-details-outline" size={30} color="#555" />
+            <Icon name="card-account-details-outline" size={20} color="#555" />
             <Text style={styles.bioLabel}>نبذة عني </Text>
           </View>
           <Text style={styles.bioText}>{teacher.bio}</Text>
@@ -188,14 +202,14 @@ const TeacherInfoScreen = ({ route, navigation }) => {
           }}
         >
           <Icon
-            name="email-fast"
+            name="email-fast-outline"
             size={35}
-            color="#555"
+            color="#060e1a"
             style={{
               borderWidth: 1.5,
               padding: 4,
               borderRadius: 10,
-              borderColor: "#d9d9d9",
+              borderColor: "#30b3ff",
             }}
           />
         </TouchableOpacity>
@@ -213,7 +227,7 @@ const styles = StyleSheet.create({
   teacherDetails: {
     flex: 1,
     paddingHorizontal: 10,
-    backgroundColor: "#F6F6F6",
+    // backgroundColor: "#f0eeee",
   },
   videoContainer: {
     width: "100%",
@@ -239,7 +253,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 5,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     paddingVertical: 20,
     justifyContent: "space-between",
     borderRadius: 10,
@@ -260,7 +274,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#ffffff",
     borderRadius: 10,
-
+    borderTopWidth: 1,
+    borderTopColor: "#e7e7e7",
     padding: 10,
   },
   infoItem: { alignItems: "center" },
@@ -292,6 +307,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 10,
     padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e7e7e7",
   },
   sectionTitle: {
     fontSize: 16,
@@ -300,11 +317,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#333",
   },
-  topicsContainer: {
-    flexDirection: "row-reverse",
-    justifyContent: "center",
-    paddingVertical: 30,
-  },
+
   topicText: {
     fontSize: 13,
     color: "#333",
@@ -348,6 +361,18 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontFamily: "Cairo",
     fontWeight: "bold",
+  },
+  topicRow: {
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    justifyContent: "center",
+    marginBottom: 5,
+  },
+  topicText: {
+    fontSize: 13,
+    color: "#333",
+    fontFamily: "Cairo",
+    paddingHorizontal: 10,
   },
 });
 

@@ -15,8 +15,8 @@ const Topics = ({ onPress, selectedTopics }) => {
     { id: "3", name: "كيمياء", icon: "test-tube" },
     { id: "4", name: "أحياء", icon: "bacteria-outline" },
     { id: "5", name: "لغة عربية", icon: "abjad-arabic" },
-    { id: "6", name: "English", icon: "alphabetical" },
-    { id: "7", name: "עברית", icon: "abjad-hebrew" },
+    { id: "6", name: "لغة انجليزية", icon: "alphabetical" },
+    { id: "7", name: "لغة عبرية", icon: "abjad-hebrew" },
     { id: "8", name: "برمجة", icon: "microsoft-visual-studio-code" },
   ];
 

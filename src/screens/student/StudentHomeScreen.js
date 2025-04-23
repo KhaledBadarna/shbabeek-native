@@ -115,10 +115,10 @@ const StudentHomeScreen = ({ navigation }) => {
     { id: "5", name: "لغة عربية", image: require("../../assets/arabic.png") },
     {
       id: "6",
-      name: "English",
+      name: "لغة انجليزية",
       image: require("../../assets/abc.png"),
     },
-    { id: "7", name: "עברית", image: require("../../assets/aleph.png") },
+    { id: "7", name: "لغة عبرية", image: require("../../assets/aleph.png") },
     {
       id: "8",
       name: "برمجة",

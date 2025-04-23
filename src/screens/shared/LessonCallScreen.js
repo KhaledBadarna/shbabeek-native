@@ -17,6 +17,8 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 // import { WebView } from "react-native-webview";
 import handleLessonEnd from "../../utils/handleLessonEnd";
+import { removeLesson } from "../../redux/slices/lessonsSlice";
+import { useDispatch } from "react-redux";
 const APP_ID = "15ef0849bb20486ba1a533f2e976d7fc";
 const CHANNEL_NAME = "lesson123";
 const TOKEN = null;
@@ -33,7 +35,7 @@ const LessonCallScreen = ({ navigation, route }) => {
   const [camOn, setCamOn] = useState(true);
   const [timeLeft, setTimeLeft] = useState(LESSON_DURATION);
   const timerRef = useRef(null);
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (Platform.OS === "android") requestPermissions();
 
@@ -105,8 +107,10 @@ const LessonCallScreen = ({ navigation, route }) => {
     engine.muteLocalVideoStream(camOn);
     setCamOn((prev) => !prev);
   };
+
   handleLeave = async () => {
-    // await handleLessonEnd(lessonId, teacherId, paidAmount, 0); // rating = 0
+    await handleLessonEnd(lessonId, teacherId, paidAmount, 0); // ✅ Update Firestore
+    dispatch(removeLesson(lessonId)); // ✅ Instantly clear from Redux
     engine.leaveChannel();
     stopTimer();
     navigation.navigate("Home", {
@@ -116,15 +120,16 @@ const LessonCallScreen = ({ navigation, route }) => {
   };
   return (
     <View style={styles.container}>
-      {/* 
-      ✅ Whiteboard shown in WebView (Disabled for now — for iPad use later)
-      <WebView
-        source={{ uri: `http://192.168.1.7:5173/?board=${CHANNEL_NAME}` }}
+      {/* <WebView
+        source={{
+          uri: `https://whiteboard.agora.io/board.html?appId=${APP_ID}&channel=${
+            roomName || CHANNEL_NAME
+          }`,
+        }}
         style={{ flex: 1 }}
         javaScriptEnabled
         domStorageEnabled
-      />
-      */}
+      /> */}
 
       {/* Remote user full screen */}
       {joined && remoteUid !== null && (

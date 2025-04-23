@@ -17,9 +17,12 @@ const lessonsSlice = createSlice({
         lesson.oppositeUser = userData; // ✅ Attach opposite user data
       }
     },
+    removeLesson: (state, action) => {
+      return state.filter((lesson) => lesson.id !== action.payload);
+    },
   },
 });
 
-export const { setLessons, addLesson, updateLessonWithUser } =
+export const { setLessons, addLesson, updateLessonWithUser, removeLesson } =
   lessonsSlice.actions;
 export default lessonsSlice.reducer;

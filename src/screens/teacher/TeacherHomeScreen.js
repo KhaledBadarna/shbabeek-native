@@ -175,12 +175,16 @@ const TeacherHomeScreen = () => {
         <WeeklyDateSelector
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
-          availableSlots={lessons}
+          availableSlots={lessons.filter((l) => !l.isLessonCompleted)} // 👈 exclude completed lessons
           type="lessons"
         />
         <LessonsCard
           lessons={lessons
-            .filter((lesson) => lesson.selectedDate === selectedDate)
+            .filter(
+              (lesson) =>
+                lesson.selectedDate === selectedDate &&
+                !lesson.isLessonCompleted // 👈 hide completed lessons
+            )
             .sort((a, b) => {
               const toMinutes = (time) => {
                 const [h, m] = time.split(":").map(Number);
