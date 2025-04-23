@@ -43,6 +43,7 @@ const LessonCallScreen = ({ navigation, route }) => {
   const [timeLeft, setTimeLeft] = useState(LESSON_DURATION);
   const timerRef = useRef(null);
   const dispatch = useDispatch();
+  const hasLeftRef = useRef(false);
   const startTimer = () => {
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -95,15 +96,17 @@ const LessonCallScreen = ({ navigation, route }) => {
       startTimer();
     }
   }, [joined]);
-  const requestPermissions = async () => {
-    await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-    ]);
-  };
+  // const requestPermissions = async () => {
+  //   await PermissionsAndroid.requestMultiple([
+  //     PermissionsAndroid.PERMISSIONS.CAMERA,
+  //     PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+  //   ]);
+  // };
+  const isTesting = true;
 
   useEffect(() => {
     const interval = setInterval(() => {
+      if (isTesting) return;
       const now = new Date();
       const start = new Date(`${selectedDate}T${startTime}:00`);
       const end = new Date(`${selectedDate}T${endTime}:00`);
@@ -114,7 +117,10 @@ const LessonCallScreen = ({ navigation, route }) => {
         setTimeLeft(end - now); // ✅ countdown in progress
       } else {
         setTimeLeft(0);
-        handleLeave(); // ⛔ time’s up
+        if (!hasLeftRef.current) {
+          hasLeftRef.current = true;
+          handleLeave(); // ✅ only once
+        }
       }
     }, 1000);
 
