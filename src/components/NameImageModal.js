@@ -49,7 +49,27 @@ const NameImageModal = ({ visible, onClose }) => {
       setImageUri(result.assets[0].uri);
     }
   };
+  const uploadToCloudinary = async (uri) => {
+    const formData = new FormData();
+    formData.append("file", {
+      uri,
+      name: "profile.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("upload_preset", "profile_upload");
+    formData.append("cloud_name", "dmewlyit3");
 
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dmewlyit3/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    return data.secure_url;
+  };
   const handleSave = async () => {
     if (role === "student") {
       if (!name.trim()) {
@@ -86,23 +106,24 @@ const NameImageModal = ({ visible, onClose }) => {
     try {
       const collectionName = role === "teacher" ? "teachers" : "students";
       const userRef = doc(firestore, collectionName, userId);
-      const data = { name };
-      if (role === "teacher" && imageUri) {
-        data.profileImage = imageUri;
+      const data = { name }; // ✅ define it here
+
+      if (imageUri) {
+        const cloudUrl = await uploadToCloudinary(imageUri);
+        data.profileImage = cloudUrl;
       }
 
       await updateDoc(userRef, data);
 
       const formatName = (fullName) => {
         const parts = fullName.trim().split(" ");
-        if (parts.length === 1) return parts[0];
-        return `${parts[0]} ${parts[1][0]}.`;
+        return parts.length === 1 ? parts[0] : `${parts[0]} ${parts[1][0]}.`;
       };
 
       dispatch(
         setUserInfo({
           name: formatName(name),
-          profileImage: imageUri || "",
+          profileImage: data.profileImage || "",
         })
       );
 

@@ -89,6 +89,7 @@ const TopicTeachersScreen = ({ route, navigation }) => {
   };
 
   const renderCard = ({ item }) => {
+    console.log("item", item);
     return (
       <TeacherCard
         name={item.name}

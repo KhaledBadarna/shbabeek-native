@@ -182,7 +182,7 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
               userType: userRole,
             })
           );
-
+          await registerForPushNotificationsAsync(userIdToUse, userRole);
           if (userRole === "teacher") {
             dispatch(setTeacherData(existingUser));
           } else {
@@ -203,8 +203,6 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
         return; // ⛔ Don't close AuthModal yet
       }
 
-      // ✅ Everything ok, close modal
-      await registerForPushNotificationsAsync(userIdToUse, userRole);
       onClose();
     } catch (error) {
       console.error("❌ Error in confirmOtp:", error);

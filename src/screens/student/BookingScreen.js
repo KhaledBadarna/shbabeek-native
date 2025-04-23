@@ -101,11 +101,11 @@ const BookingScreen = ({ route }) => {
           name: file.name || "upload",
           type: file.mimeType || "application/octet-stream",
         });
-        formData.append("upload_preset", "YOUR_UPLOAD_PRESET");
-        formData.append("cloud_name", "YOUR_CLOUD_NAME");
+        data.append("upload_preset", "profile_upload");
+        data.append("cloud_name", "dmewlyit3");
 
         const res = await fetch(
-          "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/auto/upload",
+          "https://api.cloudinary.com/v1_1/dmewlyit3/auto/upload",
           {
             method: "POST",
             body: formData,

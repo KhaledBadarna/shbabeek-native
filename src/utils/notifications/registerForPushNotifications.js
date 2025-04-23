@@ -1,35 +1,40 @@
-import React from "react";
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
+import { getApp } from "firebase/app";
 
-export async function registerForPushNotificationsAsync() {
+// Get Firestore instance
+const firestore = getFirestore(getApp());
+
+export async function registerForPushNotificationsAsync(userId, userType) {
   try {
-    // Request permission for push notifications
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== "granted") {
-      console.warn("❌ Push permission not granted");
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      console.log("❌ Notification permissions not granted");
       return;
     }
 
-    // Get the Expo push token
-    const token = await Notifications.getExpoPushTokenAsync({
-      projectId: "802e361c-3d19-463a-9dd3-010711e886da",
-    });
-    console.log("📱 Expo Push Token:", token.data);
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("📱 Expo Push Token:", token);
 
-    // Handle notifications in foreground
-    Notifications.addNotificationReceivedListener((notification) => {
-      // This is where you can handle received notifications when app is in the foreground
-      console.log("🔔 Notification received in foreground:", notification);
-    });
+    if (!userId || !userType) {
+      console.log("🚨 Missing userId or userType — not saving token");
+      return;
+    }
 
-    // Handle user tapping on a notification
-    Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log("🔔 Notification response:", response);
-    });
+    const collectionName = userType === "teacher" ? "teachers" : "students";
+    const userRef = doc(firestore, collectionName, userId);
+    await updateDoc(userRef, { pushToken: token });
 
-    return token.data; // Return the Expo push token
+    console.log("✅ Token saved to Firestore");
   } catch (err) {
-    console.error("🚨 Error registering for push notifications:", err);
+    console.error("❌ Failed to register push notifications:", err);
   }
 }

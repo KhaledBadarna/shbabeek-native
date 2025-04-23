@@ -26,8 +26,15 @@ const UID = 0;
 const LESSON_DURATION = 60 * 60 * 1000;
 
 const LessonCallScreen = ({ navigation, route }) => {
-  const { lessonId, teacherId, paidAmount, oppositeUser, roomName } =
-    route.params;
+  const {
+    lessonId,
+    teacherId,
+    paidAmount,
+    startTime,
+    endTime,
+    selectedDate,
+    roomName,
+  } = route.params;
   const [engine] = useState(() => createAgoraRtcEngine());
   const [joined, setJoined] = useState(false);
   const [remoteUid, setRemoteUid] = useState(null);
@@ -36,25 +43,46 @@ const LessonCallScreen = ({ navigation, route }) => {
   const [timeLeft, setTimeLeft] = useState(LESSON_DURATION);
   const timerRef = useRef(null);
   const dispatch = useDispatch();
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1000) {
+          stopTimer();
+          handleLeave();
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+  };
   useEffect(() => {
-    if (Platform.OS === "android") requestPermissions();
+    const setupAgora = async () => {
+      if (Platform.OS === "android") {
+        await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+      }
 
-    engine.initialize({
-      appId: APP_ID,
-      channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
-    });
+      engine.initialize({
+        appId: APP_ID,
+        channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
+      });
 
-    engine.registerEventHandler({
-      onJoinChannelSuccess: () => {
-        startTimer();
-      },
-      onUserJoined: (connection, uid) => setRemoteUid(uid),
-      onUserOffline: () => setRemoteUid(null),
-    });
+      engine.registerEventHandler({
+        onJoinChannelSuccess: () => {
+          setJoined(true);
+        },
+        onUserJoined: (connection, uid) => setRemoteUid(uid),
+        onUserOffline: () => setRemoteUid(null),
+      });
 
-    engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-    engine.enableVideo();
-    engine.joinChannel(TOKEN, CHANNEL_NAME, UID);
+      engine.enableVideo(); // ✅ must be after initialize
+      engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
+      engine.joinChannel(TOKEN, roomName || CHANNEL_NAME, UID);
+    };
+
+    setupAgora();
 
     return () => {
       stopTimer();
@@ -74,18 +102,24 @@ const LessonCallScreen = ({ navigation, route }) => {
     ]);
   };
 
-  const startTimer = () => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1000) {
-          stopTimer();
-          handleLeave();
-          return 0;
-        }
-        return prev - 1000;
-      });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const start = new Date(`${selectedDate}T${startTime}:00`);
+      const end = new Date(`${selectedDate}T${endTime}:00`);
+
+      if (now < start) {
+        setTimeLeft(start - now); // ⏳ waiting to start
+      } else if (now >= start && now < end) {
+        setTimeLeft(end - now); // ✅ countdown in progress
+      } else {
+        setTimeLeft(0);
+        handleLeave(); // ⛔ time’s up
+      }
     }, 1000);
-  };
+
+    return () => clearInterval(interval);
+  }, []);
 
   const stopTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -136,7 +170,6 @@ const LessonCallScreen = ({ navigation, route }) => {
         <RtcSurfaceView
           canvas={{ uid: remoteUid }}
           style={StyleSheet.absoluteFill}
-          renderMode={VideoRenderModeType.VideoRenderModeHidden}
         />
       )}
 
