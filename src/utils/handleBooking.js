@@ -81,20 +81,6 @@ export const handleBooking = async (
       })
     );
 
-    // 🛎️ Schedule notifications for student and teacher
-    let notifyDate = selectedDate;
-    let notifyStartTime = selectedSlot.startTime;
-
-    if (isTesting) {
-      const now = new Date();
-      const in15Min = new Date(now.getTime() + 15 * 60000);
-      notifyDate = in15Min.toISOString().split("T")[0];
-      notifyStartTime = `${in15Min
-        .getHours()
-        .toString()
-        .padStart(2, "0")}:${in15Min.getMinutes().toString().padStart(2, "0")}`;
-    }
-
     const studentDoc = await getDoc(doc(firestore, "students", studentId));
     const teacherDoc = await getDoc(doc(firestore, "teachers", teacherId));
 
