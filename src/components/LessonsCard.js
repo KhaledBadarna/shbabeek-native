@@ -10,10 +10,34 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector, useDispatch } from "react-redux"; // Redux import
+import InfoModal from "../components/modals/InfoModal";
 const LessonsCard = ({ lessons = [] }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   const { userType } = useSelector((state) => state.user); // or from route.params
   const navigation = useNavigation();
+  const isTesting = true; // ✅ put this here top, so during testing you can always enter
+  const handleEnterLesson = (item) => {
+    const now = new Date();
+    const lessonStart = new Date(`${item.selectedDate}T${item.startTime}:00`);
+    if (isTesting) {
+      if (now < lessonStart) {
+        setModalMessage("⏳ لا يمكنك دخول الدرس قبل موعده.");
+        setModalVisible(true);
+        return; // ❌ stop here, do not navigate
+      }
+    }
 
+    // ✅ If allowed, navigate to LessonCallScreen
+    navigation.navigate("LessonCallScreen", {
+      roomName: item.id,
+      oppositeUser: item.oppositeUser?.name,
+      lessonId: item.id,
+      teacherId: item.teacherId,
+      paidAmount: item.paidAmount,
+      userType: userType,
+    });
+  };
   if (!lessons || lessons.length === 0) {
     return (
       <Text style={styles.noLessonsText}>لا يوجد مواعيد متاحة لهذا اليوم</Text>
@@ -58,20 +82,17 @@ const LessonsCard = ({ lessons = [] }) => {
 
             <TouchableOpacity
               style={styles.enterLessonButton}
-              onPress={() =>
-                navigation.navigate("LessonCallScreen", {
-                  roomName: item.id,
-                  oppositeUser: item.oppositeUser?.name,
-                  lessonId: item.id,
-                  teacherId: item.teacherId,
-                  paidAmount: item.paidAmount,
-                  userType: userType,
-                })
-              }
+              onPress={() => handleEnterLesson(item)}
             >
               <Text style={styles.enterLessonButtonText}>دخول الدرس</Text>
             </TouchableOpacity>
           </View>
+          <InfoModal
+            isVisible={modalVisible} // your boolean (true/false)
+            onClose={() => setModalVisible(false)} // what happens when click outside or close
+            message={modalMessage} // the message text you show
+            confirmText="تم" // text inside the button
+          />
         </View>
       )}
     />

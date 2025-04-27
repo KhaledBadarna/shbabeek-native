@@ -12,6 +12,7 @@ import {
   setDoc,
   arrayUnion,
 } from "firebase/firestore";
+
 export const handleBooking = async (
   teacher,
   teacherId,
@@ -22,7 +23,7 @@ export const handleBooking = async (
   selectedTopic,
   dispatch
 ) => {
-  const isTesting = true; // 🔥 خليها true للتجربة
+  const isTesting = false; // ✅ خليه true وقت اختبار الإشعار، بعدين ارجعه false بالنسخة النهائية
 
   try {
     const conflict = await checkStudentBookingConflict(
@@ -81,6 +82,25 @@ export const handleBooking = async (
       })
     );
 
+    // ✅ جدولة الإشعار
+    let notifyDate = selectedDate;
+    let notifyStartTime = selectedSlot.startTime;
+
+    if (isTesting) {
+      // وقت التجربة 🔥 جدولة الإشعار على بعد 1 دقيقة فقط
+      const now = new Date();
+      const inOneMinute = new Date(now.getTime() + 60000);
+      notifyDate = inOneMinute.toISOString().split("T")[0];
+      notifyStartTime = `${inOneMinute
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${inOneMinute
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
+    // ✅ جلب التوكين
     const studentDoc = await getDoc(doc(firestore, "students", studentId));
     const teacherDoc = await getDoc(doc(firestore, "teachers", teacherId));
 
