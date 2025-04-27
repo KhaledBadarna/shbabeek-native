@@ -15,6 +15,21 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import PaymentMethodModal from "../../components/modals/PaymentMethodModal";
 
 const BookingScreen = ({ route }) => {
+  //   import { payWithTranzila } from "../your_path_to/tranzilaPayment";
+
+  // const handlePayNow = async () => {
+  //   const result = await payWithTranzila({
+  //     amount: 100, // amount in NIS
+  //     cardToken: "the_saved_card_token_here",
+  //     description: "Lesson booking",
+  //   });
+
+  //   if (result.success) {
+  //     console.log("✅ Payment completed!");
+  //   } else {
+  //     console.log("❌ Payment failed:", result.error);
+  //   }
+  // };
   const { selectedSlot, selectedDate, topicName, teacherId, teacher } =
     route.params; // ✅ Get params from navigation
 
@@ -273,7 +288,6 @@ const BookingScreen = ({ route }) => {
                   >
                     50 دقيقة
                   </Text>
-                  {"   "}
                   (الوقت الفعلي للدرس)
                 </Text>
               </View>

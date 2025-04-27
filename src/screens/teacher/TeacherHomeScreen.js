@@ -60,6 +60,10 @@ const TeacherHomeScreen = () => {
             lesson.createdAt instanceof Timestamp
               ? lesson.createdAt.toDate().toISOString()
               : lesson.createdAt,
+          endedAt:
+            lesson.endedAt instanceof Timestamp
+              ? lesson.endedAt.toDate().toISOString()
+              : lesson.endedAt,
         });
       }
 
@@ -102,6 +106,10 @@ const TeacherHomeScreen = () => {
                 lesson.createdAt instanceof Timestamp
                   ? lesson.createdAt.toDate().toISOString()
                   : lesson.createdAt,
+              endedAt:
+                lesson.endedAt instanceof Timestamp
+                  ? lesson.endedAt.toDate().toISOString()
+                  : lesson.endedAt,
             });
           }
 

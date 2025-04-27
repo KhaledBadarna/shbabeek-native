@@ -85,3 +85,46 @@ exports.resetOldSlots = onSchedule("every day 00:00", async () => {
   }
   console.log("✅ Reset old slots");
 });
+
+// ✅ Tranzila Payment Cloud Function
+exports.createPayment = functions.https.onCall(async (data, context) => {
+  try {
+    const { amount, cardToken, description, currency = "1" } = data; // currency 1 = Israeli Shekel (NIS)
+
+    if (!amount || !cardToken || !description) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Missing payment parameters."
+      );
+    }
+
+    const formData = new URLSearchParams();
+    formData.append("supplier", "YOUR_SUPPLIER_ID");
+    if ("YOUR_TERMINAL_PASSWORD") {
+      formData.append("TranzilaPW", "YOUR_TERMINAL_PASSWORD");
+    }
+    formData.append("sum", amount.toString());
+    formData.append("currency", currency);
+    formData.append("TranzilaTK", cardToken); // tokenized card
+    formData.append("description", description);
+
+    const response = await fetch(
+      "https://secure5.tranzila.com/cgi-bin/tranzila31u.cgi",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const textResponse = await response.text();
+
+    if (textResponse.includes("Response=000")) {
+      return { success: true, message: "Payment completed successfully." };
+    } else {
+      return { success: false, message: "Payment failed.", raw: textResponse };
+    }
+  } catch (error) {
+    console.error("❌ Payment error:", error);
+    throw new functions.https.HttpsError("internal", "Payment failed.");
+  }
+});

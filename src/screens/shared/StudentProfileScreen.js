@@ -25,6 +25,9 @@ import AuthModal from "../../components/modals/AuthModal";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
 import InfoModal from "../../components/modals/InfoModal";
+import ContactWhatsAppModal from "../../components/modals/ContactWhatsAppModal"; // عدل المسار حسب مكان ملفك
+import PrivacyPolicyModal from "../../components/modals/PrivacyPolicyModal"; // اضبط المسار حسب مكان المودال
+
 const StudentProfileScreen = () => {
   const image = useSelector((state) => state.user.profileImage);
   const [profileImage, setProfileImage] = useState(image);
@@ -34,7 +37,8 @@ const StudentProfileScreen = () => {
   const navigation = useNavigation();
   const { name, phone, userId, userType } = useSelector((state) => state.user);
   const [infoVisible, setInfoVisible] = useState(false);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [privacyVisible, setPrivacyVisible] = useState(false);
   const handleLogout = () => {
     dispatch(resetFavorites()); // ✅ Clear favorites on logout
     dispatch(logout());
@@ -242,16 +246,29 @@ const StudentProfileScreen = () => {
           <Text style={styles.optionText}>تغيير رقم الهاتف</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionRow}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.optionRow}
+        >
           <Icon name="message" size={24} color="#555" />
           <Text style={styles.optionText}>تواصل مع شبايك</Text>
         </TouchableOpacity>
+        <ContactWhatsAppModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        />
 
-        <TouchableOpacity style={styles.optionRow}>
+        <TouchableOpacity
+          onPress={() => setPrivacyVisible(true)}
+          style={styles.optionRow}
+        >
           <Icon name="shield-lock" size={24} color="#555" />
           <Text style={styles.optionText}>سياسة الخصوصية</Text>
         </TouchableOpacity>
-
+        <PrivacyPolicyModal
+          visible={privacyVisible}
+          onClose={() => setPrivacyVisible(false)}
+        />
         <TouchableOpacity onPress={handleLogout} style={styles.optionRow}>
           <Icon name="logout" size={24} color="#DF3F5E" />
           <Text style={[styles.optionText, { color: "#DF3F5E" }]}>

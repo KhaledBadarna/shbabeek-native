@@ -9,14 +9,23 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux"; // Redux import
+import { useSelector } from "react-redux";
 import InfoModal from "../components/modals/InfoModal";
+
 const LessonsCard = ({ lessons = [] }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const { userType } = useSelector((state) => state.user); // or from route.params
+  const { userType } = useSelector((state) => state.user);
   const navigation = useNavigation();
-  const isTesting = false; // ✅ put this here top, so during testing you can always enter
+  const isTesting = false;
+
+  // ✅✅✅ put this OUTSIDE any function
+  const formatName = (fullName) => {
+    if (!fullName) return "";
+    const [first, last = ""] = fullName.trim().split(" ");
+    return `${first} ${last.charAt(0)}.`.trim();
+  };
+
   const handleEnterLesson = (item) => {
     const now = new Date();
     const lessonStart = new Date(`${item.selectedDate}T${item.startTime}:00`);
@@ -24,11 +33,10 @@ const LessonsCard = ({ lessons = [] }) => {
       if (now < lessonStart) {
         setModalMessage("⏳ لا يمكنك دخول الدرس قبل موعده.");
         setModalVisible(true);
-        return; // ❌ stop here, do not navigate
+        return;
       }
     }
 
-    // ✅ If allowed, navigate to LessonCallScreen
     navigation.navigate("LessonCallScreen", {
       roomName: item.id,
       oppositeUser: item.oppositeUser?.name,
@@ -38,6 +46,7 @@ const LessonsCard = ({ lessons = [] }) => {
       userType: userType,
     });
   };
+
   if (!lessons || lessons.length === 0) {
     return (
       <Text style={styles.noLessonsText}>لا يوجد مواعيد متاحة لهذا اليوم</Text>
@@ -58,7 +67,7 @@ const LessonsCard = ({ lessons = [] }) => {
               style={styles.profileImage}
             />
             <Text style={styles.lessonDate}>
-              {item.oppositeUser?.name || "Unknown User"}
+              {formatName(item.oppositeUser?.name) || "Unknown User"}
             </Text>
           </View>
 
@@ -88,10 +97,10 @@ const LessonsCard = ({ lessons = [] }) => {
             </TouchableOpacity>
           </View>
           <InfoModal
-            isVisible={modalVisible} // your boolean (true/false)
-            onClose={() => setModalVisible(false)} // what happens when click outside or close
-            message={modalMessage} // the message text you show
-            confirmText="تم" // text inside the button
+            isVisible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            message={modalMessage}
+            confirmText="تم"
           />
         </View>
       )}

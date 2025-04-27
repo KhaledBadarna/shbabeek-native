@@ -1,3 +1,4 @@
+// ✅ UPDATED PaymentMethodModal.js
 import React, { useState } from "react";
 import {
   View,
@@ -14,6 +15,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../firebase";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { setUserInfo } from "../../redux/slices/userSlice";
+
 const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [cardNumber, setCardNumber] = useState("");
@@ -24,6 +26,16 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
 
   const isIOS = Platform.OS === "ios";
 
+  const tokenizeVisaCard = async (cardNumber, expiry, cvv) => {
+    // 🧪 MOCK only for now. Replace later with Tranzila real tokenization.
+    if (!cardNumber || !expiry || !cvv) throw new Error("Missing card data");
+
+    // Generate fake token for now
+    const randomFakeToken = `FAKE-TOKEN-${Math.floor(Math.random() * 100000)}`;
+    const last4 = cardNumber.slice(-4);
+    return { token: randomFakeToken, last4 };
+  };
+
   const handlePaymentSelection = (method) => {
     setSelectedMethod(method);
   };
@@ -32,10 +44,23 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
     if (!userId) return alert("حدث خطأ. لا يوجد معرف المستخدم.");
 
     try {
-      await updateDoc(doc(firestore, "students", userId), {
-        defaultPaymentMethod: selectedMethod,
-      });
-      dispatch(setUserInfo({ defaultPaymentMethod: selectedMethod }));
+      let updateData = { defaultPaymentMethod: selectedMethod };
+
+      if (selectedMethod === "Visa") {
+        // Tokenize the card first
+        const { token, last4 } = await tokenizeVisaCard(
+          cardNumber,
+          expiry,
+          cvv
+        );
+        updateData.cardToken = token;
+        updateData.last4 = last4;
+      }
+
+      await updateDoc(doc(firestore, "students", userId), updateData);
+
+      dispatch(setUserInfo(updateData));
+
       alert("✅ تم حفظ طريقة الدفع بنجاح");
       setOpenPaymentMethod(false);
       setSelectedMethod(null);
@@ -43,9 +68,10 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
       setExpiry("");
       setCvv("");
     } catch (err) {
-      console.error("Error saving payment:", err);
+      console.error("Error saving payment method:", err);
     }
   };
+
   const handleClose = () => {
     setSelectedMethod(null);
     setCardNumber("");
@@ -53,11 +79,11 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
     setCvv("");
     setOpenPaymentMethod(false);
   };
+
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          {/* Close Button in Top Left */}
           <TouchableOpacity style={styles.closeIcon} onPress={handleClose}>
             <Icon name="close-circle-outline" size={26} color="#031417" />
           </TouchableOpacity>
@@ -151,6 +177,8 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
     </Modal>
   );
 };
+
+// ✅ Your styles same as before...
 
 const styles = StyleSheet.create({
   backdrop: {

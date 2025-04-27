@@ -78,6 +78,12 @@ const fetchLessons = async (userType, userId, dispatch) => {
               : typeof createdAt === "string"
               ? createdAt
               : null,
+          endedAt:
+            endedAt instanceof Timestamp
+              ? endedAt.toDate().toISOString()
+              : typeof endedAt === "string"
+              ? endedAt
+              : null,
         });
       }
     }
