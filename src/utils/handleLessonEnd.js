@@ -1,45 +1,60 @@
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "../firebase";
-
-const handleLessonEnd = async (lessonId, teacherId, paidAmount, rating) => {
+const handleLessonEnd = async (
+  lessonId,
+  teacherId,
+  paidAmount,
+  rating,
+  userType
+) => {
   try {
-    // ✅ 1. Mark the lesson as completed
-    await updateDoc(doc(firestore, "lessons", lessonId), {
-      isLessonCompleted: true,
-    });
+    const lessonRef = doc(firestore, "lessons", lessonId);
+    const lessonSnap = await getDoc(lessonRef);
+    if (!lessonSnap.exists()) return;
 
-    // ✅ 2. Calculate teacher's net earnings
-    const teacherNetAmount = Math.round(paidAmount * 0.93);
+    const lessonData = lessonSnap.data();
+    const alreadyCompleted = lessonData?.isLessonCompleted;
 
-    // ✅ 3. Prepare update payload
-    const updatePayload = {
-      lessonsCount: increment(1),
-      pendingPayout: increment(teacherNetAmount),
-    };
+    // ✅ Only teacher marks complete
+    if (userType === "teacher" && !alreadyCompleted) {
+      await updateDoc(lessonRef, {
+        isLessonCompleted: true,
+        endedBy: teacherId,
+        endedAt: serverTimestamp(),
+      });
 
-    // ✅ 4. If rating is given, update rating stats
-    if (rating > 0) {
-      updatePayload.ratingCount = increment(1);
-      updatePayload.ratingSum = increment(rating);
+      const netAmount = Math.round(paidAmount * 0.93);
 
-      const teacherRef = doc(firestore, "teachers", teacherId);
-      const teacherSnap = await getDoc(teacherRef);
-      if (teacherSnap.exists()) {
-        const { ratingSum = 0, ratingCount = 0 } = teacherSnap.data();
-        const newSum = ratingSum + rating;
-        const newCount = ratingCount + 1;
-        updatePayload.rating = parseFloat((newSum / newCount).toFixed(1));
-      }
+      await updateDoc(doc(firestore, "teachers", teacherId), {
+        lessonsCount: increment(1),
+        pendingPayout: increment(netAmount),
+      });
+
+      console.log("✅ Teacher ended session and payout updated");
     }
 
-    // ✅ 5. Apply updates
-    await updateDoc(doc(firestore, "teachers", teacherId), updatePayload);
+    // ✅ Student can only submit rating
+    if (userType === "student" && rating > 0) {
+      const teacherRef = doc(firestore, "teachers", teacherId);
+      const snap = await getDoc(teacherRef);
+      if (snap.exists()) {
+        const { ratingSum = 0, ratingCount = 0 } = snap.data();
+        const avg = parseFloat(
+          ((ratingSum + rating) / (ratingCount + 1)).toFixed(1)
+        );
 
-    console.log("✅ Lesson completed and teacher stats updated.");
-  } catch (error) {
-    console.error("❌ Error in handleLessonEnd:", error);
-    throw new Error("Something went wrong while completing the lesson.");
+        await updateDoc(teacherRef, {
+          ratingCount: increment(1),
+          ratingSum: increment(rating),
+          rating: avg,
+        });
+
+        console.log("⭐ Student rating submitted");
+      }
+    }
+  } catch (err) {
+    console.error("❌ handleLessonEnd error:", err);
+    throw new Error("Something went wrong");
   }
 };
-
 export default handleLessonEnd;

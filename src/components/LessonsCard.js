@@ -9,8 +9,9 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
-
+import { useSelector, useDispatch } from "react-redux"; // Redux import
 const LessonsCard = ({ lessons = [] }) => {
+  const { userType } = useSelector((state) => state.user); // or from route.params
   const navigation = useNavigation();
 
   if (!lessons || lessons.length === 0) {
@@ -64,6 +65,7 @@ const LessonsCard = ({ lessons = [] }) => {
                   lessonId: item.id,
                   teacherId: item.teacherId,
                   paidAmount: item.paidAmount,
+                  userType: userType,
                 })
               }
             >

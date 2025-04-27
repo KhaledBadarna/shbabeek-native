@@ -2,7 +2,21 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 
-const InfoModal = ({ isVisible, onClose, message }) => {
+const InfoModal = ({
+  isVisible,
+  onClose,
+  message,
+  confirmText = "تم",
+  onConfirm,
+}) => {
+  const handlePress = () => {
+    if (onConfirm) {
+      onConfirm(); // إذا موجود onConfirm نفذه
+    } else {
+      onClose(); // إذا مش موجود onConfirm سكر فقط
+    }
+  };
+
   return (
     <Modal
       animationIn="bounceIn"
@@ -12,8 +26,9 @@ const InfoModal = ({ isVisible, onClose, message }) => {
     >
       <View style={styles.modalContent}>
         <Text style={styles.messageText}>{message}</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeText}>تم</Text>
+        <TouchableOpacity onPress={handlePress} style={styles.closeButton}>
+          <Text style={styles.closeText}>{confirmText}</Text>
+          {/* ✅ نص الزر يجي من confirmText */}
         </TouchableOpacity>
       </View>
     </Modal>

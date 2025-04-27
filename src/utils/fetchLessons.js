@@ -66,7 +66,8 @@ const fetchLessons = async (userType, userId, dispatch) => {
           if (endMinutes <= nowMinutes) continue;
         }
 
-        const { createdAt, ...rest } = lesson;
+        const { createdAt, endedAt, ...rest } = lesson;
+
         rawLessons.push({
           ...rest,
           id: docSnap.id,
