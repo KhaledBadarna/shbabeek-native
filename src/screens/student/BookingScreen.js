@@ -150,8 +150,11 @@ const BookingScreen = ({ route }) => {
               resizeMode="contain"
             />
             <Icon name="check-decagram" size={50} color="#009dff" />
-            <Text style={styles.successMessageText}>
-              تم حجز الدرس بنجاح! يمكنك رؤية الدروس في قائمة "دروسي"
+            <Text style={styles.successMessageText}>تم حجز الدرس بنجاح!</Text>
+            <Text
+              style={{ fontFamily: "Cairo", fontSize: 12, color: "#a8a8a8" }}
+            >
+              يمكنك رؤية الدروس في قائمة دروسي
             </Text>
           </View>
         ) : (
@@ -563,7 +566,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 50,
   },
-  successMessageText: { fontFamily: "Cairo", marginTop: 10 },
+  successMessageText: {
+    fontFamily: "Cairo",
+    marginTop: 10,
+  },
   attachFileText: { fontFamily: "Cairo", color: "#fff" },
 });
 
