@@ -1,5 +1,7 @@
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "../firebase";
+import { serverTimestamp } from "firebase/firestore";
+import { increment } from "firebase/firestore";
 const handleLessonEnd = async (
   lessonId,
   teacherId,

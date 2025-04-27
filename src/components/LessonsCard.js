@@ -16,7 +16,7 @@ const LessonsCard = ({ lessons = [] }) => {
   const [modalMessage, setModalMessage] = useState("");
   const { userType } = useSelector((state) => state.user); // or from route.params
   const navigation = useNavigation();
-  const isTesting = true; // ✅ put this here top, so during testing you can always enter
+  const isTesting = false; // ✅ put this here top, so during testing you can always enter
   const handleEnterLesson = (item) => {
     const now = new Date();
     const lessonStart = new Date(`${item.selectedDate}T${item.startTime}:00`);
