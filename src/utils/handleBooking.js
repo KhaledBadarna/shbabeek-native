@@ -1,18 +1,17 @@
+import { scheduleLessonNotification } from "../utils/notifications/scheduleLessonNotification";
+import { checkStudentBookingConflict } from "../utils/checkBookingConflict.js";
+import { firestore } from "../firebase";
+import { addLesson } from "../redux/slices/lessonsSlice";
+import { serverTimestamp } from "firebase/firestore";
 import {
   collection,
   addDoc,
-  serverTimestamp,
   doc,
   getDoc,
   updateDoc,
   setDoc,
   arrayUnion,
 } from "firebase/firestore";
-import { firestore } from "../firebase";
-import { uploadFile } from "./uploadFile";
-import { addLesson } from "../redux/slices/lessonsSlice"; // ✅ Import Redux action
-import { checkStudentBookingConflict } from "./checkBookingConflict";
-
 export const handleBooking = async (
   teacher,
   teacherId,
@@ -23,8 +22,9 @@ export const handleBooking = async (
   selectedTopic,
   dispatch
 ) => {
+  const isTesting = true; // 🔥 خليها true للتجربة
+
   try {
-    // 🧠 ⛔️ Check for conflicts BEFORE doing anything else
     const conflict = await checkStudentBookingConflict(
       studentId,
       selectedDate,
@@ -37,10 +37,8 @@ export const handleBooking = async (
       return { success: false, reason: "conflict" };
     }
 
-    // Upload file if available
     const fileUrl = file ? await uploadFile(file) : null;
 
-    // ✅ Base lesson data (without timestamps)
     const baseLessonData = {
       teacherId,
       studentId,
@@ -55,10 +53,9 @@ export const handleBooking = async (
       isTeacherPaidOut: false,
     };
 
-    // ✅ Step 1: Add lesson to Firestore
     const firestoreLessonData = {
       ...baseLessonData,
-      createdAt: serverTimestamp(), // ✅ Firestore only
+      createdAt: serverTimestamp(),
     };
 
     const lessonRef = await addDoc(
@@ -67,10 +64,9 @@ export const handleBooking = async (
     );
     const lessonId = lessonRef.id;
 
-    // ✅ Step 2: Dispatch to Redux (no serverTimestamp here!)
     const reduxLessonData = {
-      ...baseLessonData, // ✅ this is the correct object name
-      createdAt: Date.now(), // ✅ use serializable timestamp
+      ...baseLessonData,
+      createdAt: Date.now(),
     };
 
     dispatch(
@@ -85,7 +81,51 @@ export const handleBooking = async (
       })
     );
 
-    // ✅ Step 3: Update student booking history
+    // 🛎️ Schedule notifications for student and teacher
+    let notifyDate = selectedDate;
+    let notifyStartTime = selectedSlot.startTime;
+
+    if (isTesting) {
+      const now = new Date();
+      const in15Min = new Date(now.getTime() + 15 * 60000);
+      notifyDate = in15Min.toISOString().split("T")[0];
+      notifyStartTime = `${in15Min
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${in15Min.getMinutes().toString().padStart(2, "0")}`;
+    }
+
+    const studentDoc = await getDoc(doc(firestore, "students", studentId));
+    const teacherDoc = await getDoc(doc(firestore, "teachers", teacherId));
+
+    const studentPushToken = studentDoc.exists()
+      ? studentDoc.data().pushToken
+      : null;
+    const teacherPushToken = teacherDoc.exists()
+      ? teacherDoc.data().pushToken
+      : null;
+
+    if (studentPushToken) {
+      await scheduleLessonNotification(
+        studentPushToken,
+        notifyDate,
+        notifyStartTime,
+        "📚 لا تنسَ الدرس",
+        "⏳ درسك سيبدأ بعد 10 دقائق!"
+      );
+    }
+
+    if (teacherPushToken) {
+      await scheduleLessonNotification(
+        teacherPushToken,
+        notifyDate,
+        notifyStartTime,
+        "📚 درس قادم",
+        "🧑‍🏫 لديك درس سيبدأ بعد 10 دقائق!"
+      );
+    }
+
+    // ✅ Update student booking
     const studentBookingRef = doc(firestore, "bookings", studentId);
     const studentBookingDoc = await getDoc(studentBookingRef);
     if (studentBookingDoc.exists()) {
@@ -94,7 +134,7 @@ export const handleBooking = async (
       await setDoc(studentBookingRef, { lessonIds: [lessonId] });
     }
 
-    // ✅ Step 4: Update teacher booking history
+    // ✅ Update teacher booking
     const teacherBookingRef = doc(firestore, "bookings", teacherId);
     const teacherBookingDoc = await getDoc(teacherBookingRef);
     if (teacherBookingDoc.exists()) {
@@ -103,7 +143,7 @@ export const handleBooking = async (
       await setDoc(teacherBookingRef, { lessonIds: [lessonId] });
     }
 
-    // ✅ Step 5: Update teacher availability slot
+    // ✅ Update teacher availability
     const teacherAvailabilityRef = doc(
       firestore,
       "teacher_availability",
@@ -134,7 +174,7 @@ export const handleBooking = async (
       }
 
       await updateDoc(teacherAvailabilityRef, { slots: updatedSlots });
-      console.log("✅ Slot successfully updated to 'booked'!");
+      console.log("✅ Slot updated to 'booked'");
     }
   } catch (error) {
     console.error("❌ Error booking lesson:", error);
