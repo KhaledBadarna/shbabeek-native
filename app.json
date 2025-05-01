@@ -25,6 +25,11 @@
         "projectId": "802e361c-3d19-463a-9dd3-010711e886da"
       }
     },
-    "owner": "khaled123aws"
+    "owner": "khaled123aws",
+    "splash": {
+      "image": "./assets/splashScreen.png",
+      "resizeMode": "contain", 
+      "backgroundColor": "#009dff"
+    },"icon": "./assets/icon.png"
   }
 }

@@ -10,20 +10,25 @@ export const scheduleLessonNotification = async (
 ) => {
   try {
     const lessonStart = new Date(`${selectedDate}T${startTime}:00`);
-    const notificationTime = new Date(lessonStart.getTime() - 10 * 60 * 1000); // 10 min before
+    const triggerTimestamp = lessonStart.getTime() - 10 * 60 * 1000; // 10 min before
 
     await Notifications.scheduleNotificationAsync({
       content: {
         title,
         body,
-        sound: "default", // ✅ play default sound
-        badge: 1, // ✅ show badge
+        sound: "default",
+        badge: 1,
       },
-      trigger: notificationTime,
-      to: pushToken, // ✅ send to specific token if needed (optional for local)
+      trigger: {
+        type: "timestamp",
+        timestamp: triggerTimestamp,
+      },
     });
 
-    console.log("✅ Local Notification Scheduled for:", notificationTime);
+    console.log(
+      "✅ Local Notification Scheduled for:",
+      new Date(triggerTimestamp)
+    );
   } catch (error) {
     console.error("❌ Failed to schedule notification:", error);
   }

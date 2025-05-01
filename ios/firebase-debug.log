@@ -1,0 +1,17 @@
+[debug] [2025-04-28T14:57:53.019Z] ----------------------------------------------------------------------
+[debug] [2025-04-28T14:57:53.022Z] Command:       /Users/khaledmac/.nvm/versions/node/v20.17.0/bin/node /Users/khaledmac/.nvm/versions/node/v20.17.0/bin/firebase deploy --only functions
+[debug] [2025-04-28T14:57:53.023Z] CLI Version:   14.0.1
+[debug] [2025-04-28T14:57:53.023Z] Platform:      darwin
+[debug] [2025-04-28T14:57:53.023Z] Node Version:  v20.17.0
+[debug] [2025-04-28T14:57:53.023Z] Time:          Mon Apr 28 2025 17:57:53 GMT+0300 (Israel Daylight Time)
+[debug] [2025-04-28T14:57:53.023Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-28T14:57:53.024Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-04-28T14:57:53.120Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-28T14:57:53.121Z] > authorizing via signed-in user (badarnakhaled@gmail.com)
+[debug] [2025-04-28T14:57:53.121Z] [iam] checking project shbabeek-12df9 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-04-28T14:57:53.121Z] Checked if tokens are valid: false, expires at: 1745445816682
+[debug] [2025-04-28T14:57:53.121Z] Checked if tokens are valid: false, expires at: 1745445816682
+[debug] [2025-04-28T14:57:53.121Z] > refreshing access token with scopes: []
+[debug] [2025-04-28T14:57:53.121Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-28T14:57:53.121Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]

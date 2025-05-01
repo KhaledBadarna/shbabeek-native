@@ -13,7 +13,7 @@ import { handleBooking } from "../../utils/handleBooking";
 import { useSelector, useDispatch } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import PaymentMethodModal from "../../components/modals/PaymentMethodModal";
-
+import payForLesson from "../../utils/payForLesson";
 const BookingScreen = ({ route }) => {
   //   import { payWithTranzila } from "../your_path_to/tranzilaPayment";
 
@@ -67,16 +67,30 @@ const BookingScreen = ({ route }) => {
         return;
       }
 
+      const tempLessonId = `lesson_${Date.now()}`; // ✅ ID مؤقت
+
+      // 🧠 1. ادفع أولاً
+      const paymentSuccess = await payForLesson(
+        studentId,
+        tempLessonId,
+        totalPrice
+      );
+      if (!paymentSuccess) {
+        alert("فشل الدفع. تأكد من البطاقة أو Apple Pay.");
+        return;
+      }
+
+      // 🧠 2. ثم احجز بنفس الـ lessonId
       const result = await handleBooking(
         teacher,
         teacherId,
         selectedSlot,
         selectedDate,
         studentId,
-
         fileAttached,
         selectedTopic,
-        dispatch
+        dispatch,
+        tempLessonId // ✅ مرر الـ ID للـ booking
       );
 
       if (result.success === false && result.reason === "conflict") {
@@ -84,15 +98,12 @@ const BookingScreen = ({ route }) => {
           "⚠️ لقد قمت بالفعل بحجز درس في هذا الوقت. الرجاء اختيار وقت آخر."
         );
         setInfoVisible(true);
-
         return;
       }
 
-      // ✅ All good
-      setShowSuccessMessage(true);
+      setShowSuccessMessage(true); // ✅ تم كلشي بنجاح
     } catch (error) {
       console.error("❌ Unexpected error:", error);
-
       setInfoText("حدث خطأ أثناء حجز الدرس. حاول مرة أخرى.");
       setInfoVisible(true);
     }

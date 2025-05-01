@@ -21,7 +21,8 @@ export const handleBooking = async (
   studentId,
   file,
   selectedTopic,
-  dispatch
+  dispatch,
+  lessonId
 ) => {
   const isTesting = false; // ✅ خليه true وقت اختبار الإشعار، بعدين ارجعه false بالنسخة النهائية
 
@@ -59,11 +60,8 @@ export const handleBooking = async (
       createdAt: serverTimestamp(),
     };
 
-    const lessonRef = await addDoc(
-      collection(firestore, "lessons"),
-      firestoreLessonData
-    );
-    const lessonId = lessonRef.id;
+    const lessonRef = doc(firestore, "lessons", lessonId); // نستخدم lessonId جاهز
+    await setDoc(lessonRef, firestoreLessonData);
 
     const reduxLessonData = {
       ...baseLessonData,
@@ -139,7 +137,7 @@ export const handleBooking = async (
     } else {
       await setDoc(studentBookingRef, { lessonIds: [lessonId] });
     }
-
+    console.log("📌 Received lessonId in booking:", lessonId);
     // ✅ Update teacher booking
     const teacherBookingRef = doc(firestore, "bookings", teacherId);
     const teacherBookingDoc = await getDoc(teacherBookingRef);

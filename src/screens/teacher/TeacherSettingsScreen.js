@@ -146,7 +146,7 @@ const TeacherSettingsScreen = () => {
           <Text
             style={{
               textAlign: "right",
-              color: "#b2b2b2",
+              color: "#7f7f7f",
               fontFamily: "Cairo",
               fontSize: 12,
             }}
@@ -201,7 +201,7 @@ const TeacherSettingsScreen = () => {
           <Text
             style={{
               textAlign: "right",
-              color: "#cdcdcd",
+              color: "#7f7f7f",
               fontFamily: "Cairo",
               fontSize: 12,
             }}

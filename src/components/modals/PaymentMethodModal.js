@@ -11,10 +11,11 @@ import {
   Image,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { doc, updateDoc } from "firebase/firestore";
-import { firestore } from "../../firebase";
+import { doc, updateDoc, setDoc } from "firebase/firestore";
+import { firestore, functions } from "../../firebase";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { setUserInfo } from "../../redux/slices/userSlice";
+import { httpsCallable } from "firebase/functions";
 
 const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
@@ -27,13 +28,38 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
   const isIOS = Platform.OS === "ios";
 
   const tokenizeVisaCard = async (cardNumber, expiry, cvv) => {
-    // 🧪 MOCK only for now. Replace later with Tranzila real tokenization.
-    if (!cardNumber || !expiry || !cvv) throw new Error("Missing card data");
+    try {
+      if (!cardNumber || !expiry || !cvv) throw new Error("Missing card data");
+      const [expMonth, expYear] = expiry.split("/");
 
-    // Generate fake token for now
-    const randomFakeToken = `FAKE-TOKEN-${Math.floor(Math.random() * 100000)}`;
-    const last4 = cardNumber.slice(-4);
-    return { token: randomFakeToken, last4 };
+      console.log("📦 Sending to Cloud Function:", {
+        cardNumber,
+        expMonth,
+        expYear,
+        cvv,
+      });
+
+      const createToken = httpsCallable(functions, "createCardToken");
+      const result = await createToken({
+        cardNumber,
+        expMonth,
+        expYear,
+        cvv,
+      });
+
+      console.log("🔍 Token result:", result?.data);
+
+      if (result.data.success) {
+        const token = result.data.token;
+        const last4 = cardNumber.slice(-4);
+        return { token, last4 };
+      } else {
+        throw new Error(result.data.message || "Tokenization failed");
+      }
+    } catch (error) {
+      console.error("❌ Tokenization crash:", error);
+      throw error; // re-throw to show alert above
+    }
   };
 
   const handlePaymentSelection = (method) => {
@@ -47,7 +73,6 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
       let updateData = { defaultPaymentMethod: selectedMethod };
 
       if (selectedMethod === "Visa") {
-        // Tokenize the card first
         const { token, last4 } = await tokenizeVisaCard(
           cardNumber,
           expiry,
@@ -57,11 +82,21 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
         updateData.last4 = last4;
       }
 
-      await updateDoc(doc(firestore, "students", userId), updateData);
+      if (selectedMethod === "ApplePay") {
+        updateData.cardToken = `FAKE-APPLE-${Date.now()}`;
+        updateData.last4 = "";
+      }
 
+      if (selectedMethod === "GooglePay") {
+        updateData.cardToken = `FAKE-GOOGLE-${Date.now()}`;
+        updateData.last4 = "ⓖⓖⓖⓖ";
+      }
+      await setDoc(doc(firestore, "students", userId), updateData, {
+        merge: true,
+      });
       dispatch(setUserInfo(updateData));
-
       alert("✅ تم حفظ طريقة الدفع بنجاح");
+
       setOpenPaymentMethod(false);
       setSelectedMethod(null);
       setCardNumber("");

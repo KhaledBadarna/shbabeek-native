@@ -95,12 +95,12 @@ const StudentHomeScreen = ({ navigation }) => {
     {
       id: "1",
       name: "رياضيات",
-      image: require("../../assets/calculator.png"),
+      image: require("../../assets/triangle.png"),
     },
     {
       id: "2",
       name: "فيزياء",
-      image: require("../../assets/relativity.png"),
+      image: require("../../assets/physics.png"),
     },
     {
       id: "3",
@@ -110,19 +110,23 @@ const StudentHomeScreen = ({ navigation }) => {
     {
       id: "4",
       name: "أحياء",
-      image: require("../../assets/microscope.png"),
+      image: require("../../assets/dna.png"),
     },
-    { id: "5", name: "لغة عربية", image: require("../../assets/arabic.png") },
+    {
+      id: "5",
+      name: "لغة عربية",
+      image: require("../../assets/arabic-language.png"),
+    },
     {
       id: "6",
       name: "لغة انجليزية",
-      image: require("../../assets/abc.png"),
+      image: require("../../assets/alphabet.png"),
     },
     { id: "7", name: "لغة عبرية", image: require("../../assets/aleph.png") },
     {
       id: "8",
       name: "برمجة",
-      image: require("../../assets/code.png"),
+      image: require("../../assets/coding-language.png"),
     },
   ];
 

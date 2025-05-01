@@ -45,15 +45,47 @@ const payForLesson = async (userId, lessonId, amount) => {
     }
 
     if (defaultPaymentMethod === "ApplePay") {
-      // ⚡ Later: open Apple Pay native flow
-      console.log("ApplePay flow should start here.");
-      return false;
+      if (!cardToken) {
+        throw new Error("No saved Apple Pay token");
+      }
+
+      const createPayment = httpsCallable(functions, "createPayment");
+      const paymentResponse = await createPayment({
+        amount,
+        cardToken,
+        description: `دفع باستخدام Apple Pay للدرس رقم ${lessonId}`,
+      });
+
+      const { data } = paymentResponse;
+      if (data.success) {
+        console.log("✅ ApplePay (via Tranzila) payment successful");
+        return true;
+      } else {
+        console.error("❌ ApplePay payment failed:", data.message);
+        return false;
+      }
     }
 
     if (defaultPaymentMethod === "GooglePay") {
-      // ⚡ Later: open Google Pay native flow
-      console.log("GooglePay flow should start here.");
-      return false;
+      if (!cardToken) {
+        throw new Error("No saved Google Pay token");
+      }
+
+      const createPayment = httpsCallable(functions, "createPayment");
+      const paymentResponse = await createPayment({
+        amount,
+        cardToken,
+        description: `دفع باستخدام Google Pay للدرس رقم ${lessonId}`,
+      });
+
+      const { data } = paymentResponse;
+      if (data.success) {
+        console.log("✅ GooglePay (via Tranzila) payment successful");
+        return true;
+      } else {
+        console.error("❌ GooglePay payment failed:", data.message);
+        return false;
+      }
     }
 
     throw new Error("Unsupported payment method");

@@ -45,16 +45,26 @@ const Topics = ({ onPress, selectedTopics }) => {
         ]}
       >
         <Icon
-          style={{
-            borderRadius: 5,
+          style={[
+            {
+              borderRadius: 5,
 
-            marginLeft: 3,
-          }}
+              marginLeft: 3,
+            },
+            isSelected && { color: "#ffffff" },
+          ]}
           name={item.icon}
           size={20}
           color={"#031417"}
         />
-        <Text style={styles.topicText}>{item.name}</Text>
+        <Text
+          style={[
+            styles.topicText,
+            isSelected && { color: "#ffffff", fontWeight: "bold" }, // ✅ إذا مختار غير لون النص للأبيض
+          ]}
+        >
+          {item.name}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -68,7 +78,7 @@ const Topics = ({ onPress, selectedTopics }) => {
       <Text
         style={{
           textAlign: "right",
-          color: "#cdcdcd",
+          color: "#7f7f7f",
           fontFamily: "Cairo",
           fontSize: 12,
         }}
