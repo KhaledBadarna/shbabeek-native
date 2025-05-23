@@ -17,15 +17,15 @@ const isTimeOverlap = (start1, end1, start2, end2) => {
 };
 
 export const checkStudentBookingConflict = async (
-  studentId,
+  clientId,
   selectedDate,
   startTime,
   endTime
 ) => {
-  const lessonsRef = collection(firestore, "lessons");
+  const appointmentsRef = collection(firestore, "appointments");
   const q = query(
-    lessonsRef,
-    where("studentId", "==", studentId),
+    appointmentsRef,
+    where("clientId", "==", clientId),
     where("selectedDate", "==", selectedDate)
   );
 

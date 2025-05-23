@@ -9,8 +9,8 @@ export const scheduleLessonNotification = async (
   body
 ) => {
   try {
-    const lessonStart = new Date(`${selectedDate}T${startTime}:00`);
-    const triggerTimestamp = lessonStart.getTime() - 10 * 60 * 1000; // 10 min before
+    const appointmentStart = new Date(`${selectedDate}T${startTime}:00`);
+    const triggerTimestamp = appointmentStart.getTime() - 10 * 60 * 1000; // 10 min before
 
     await Notifications.scheduleNotificationAsync({
       content: {

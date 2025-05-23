@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userType: "student", // Or "teacher"
+  userType: "client", // Or "barber"
   name: "",
   phone: "",
   userId: "",
@@ -24,7 +24,7 @@ const userSlice = createSlice({
       state.userId = "";
       state.defaultPaymentMethod = "";
       state.isLoggedIn = false;
-      state.userType = "student";
+      state.userType = "client";
       state.profileImage = "";
     },
     setUserType(state, action) {

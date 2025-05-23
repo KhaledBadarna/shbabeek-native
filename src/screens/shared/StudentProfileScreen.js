@@ -101,7 +101,7 @@ const StudentProfileScreen = () => {
       }
 
       // ✅ Step 2: Update Firestore in Background
-      const collectionName = userType === "teacher" ? "teachers" : "students";
+      const collectionName = userType === "barber" ? "barbers" : "clients";
       const userDocRef = doc(firestore, collectionName, userId);
       await updateDoc(userDocRef, { profileImage: imageUrl });
 
@@ -123,7 +123,7 @@ const StudentProfileScreen = () => {
     }
 
     try {
-      const collectionName = userType === "teacher" ? "teachers" : "students";
+      const collectionName = userType === "barber" ? "barbers" : "clients";
 
       // ✅ Step 1: Check if the phone number already exists
       const usersCollectionRef = collection(firestore, collectionName);
@@ -182,10 +182,10 @@ const StudentProfileScreen = () => {
           {phone ? phone.replace(/^(\d{3})(\d{4})(\d{3})$/, "$1-$2-$3") : ""}
         </Text>
       </View>
-      {userType === "teacher" && (
-        <View style={styles.teachersBtnContainer}>
+      {userType === "barber" && (
+        <View style={styles.barbersBtnContainer}>
           <TouchableOpacity
-            style={styles.teachersButton}
+            style={styles.barbersButton}
             onPress={() => navigation.navigate("ProfitsScreen")}
           >
             <Icon name="finance" size={24} color="#032414" />
@@ -201,14 +201,14 @@ const StudentProfileScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[
-              styles.teachersButton,
+              styles.barbersButton,
               {
                 backgroundColor: "#ffffff",
                 borderLeftWidth: 1,
                 borderLeftColor: "#dedede",
               },
             ]}
-            onPress={() => navigation.navigate("TeacherSettingsScreen")}
+            onPress={() => navigation.navigate("BarberSettingsScreen")}
           >
             <Icon name="badge-account-horizontal" size={24} color="#1f2121" />
             <Text
@@ -365,14 +365,14 @@ const styles = StyleSheet.create({
     fontFamily: "Cairo",
   },
   icons: { backgroundColor: "#ebebeb", borderRadius: 10, padding: 5 },
-  teachersButton: {
+  barbersButton: {
     backgroundColor: "#ffffff",
     padding: 10,
     alignItems: "center",
     backgroundColor: "#ffffff",
     width: "48%",
   },
-  teachersBtnContainer: {
+  barbersBtnContainer: {
     flexDirection: "row",
     backgroundColor: "#fff",
     padding: 20,

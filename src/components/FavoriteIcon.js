@@ -13,13 +13,13 @@ import {
 import { firestore } from "../firebase";
 import AuthModal from "./modals/AuthModal"; // ✅ Use AuthModal instead of two modals
 import InfoModal from "./modals/InfoModal";
-const FavoriteIcon = ({ teacherId }) => {
+const FavoriteIcon = ({ barberId }) => {
   const { isLoggedIn, userId } = useSelector((state) => state.user);
   const { favorites } = useSelector((state) => state.favorites);
   const dispatch = useDispatch();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
-  const isFavorite = favorites.includes(teacherId);
+  const isFavorite = favorites.includes(barberId);
 
   const handleFavoritePress = async () => {
     if (!isLoggedIn) {
@@ -27,32 +27,32 @@ const FavoriteIcon = ({ teacherId }) => {
       return;
     }
 
-    if (!teacherId) {
-      console.error("Teacher ID is undefined");
+    if (!barberId) {
+      console.error("barberId ID is undefined");
       return;
     }
 
     try {
-      const studentRef = doc(firestore, "students", userId);
-      const studentDoc = await getDoc(studentRef);
+      const clientRef = doc(firestore, "clients", userId);
+      const clientDoc = await getDoc(clientRef);
 
-      if (studentDoc.exists()) {
-        const favorites = studentDoc.data().favorites || [];
+      if (clientDoc.exists()) {
+        const favorites = clientDoc.data().favorites || [];
 
         if (!isFavorite) {
           if (favorites.length < 10) {
-            await updateDoc(studentRef, {
-              favorites: arrayUnion(teacherId),
+            await updateDoc(clientRef, {
+              favorites: arrayUnion(barberId),
             });
-            dispatch(addFavorite(teacherId));
+            dispatch(addFavorite(barberId));
           } else {
             setInfoVisible(true);
           }
         } else {
-          await updateDoc(studentRef, {
-            favorites: arrayRemove(teacherId),
+          await updateDoc(clientRef, {
+            favorites: arrayRemove(barberId),
           });
-          dispatch(removeFavorite(teacherId));
+          dispatch(removeFavorite(barberId));
         }
       }
     } catch (error) {
@@ -64,9 +64,9 @@ const FavoriteIcon = ({ teacherId }) => {
     <>
       <TouchableOpacity onPress={handleFavoritePress}>
         <Icon
-          name={isFavorite ? "bookmark" : "bookmark-outline"}
+          name={isFavorite ? "heart" : "heart-outline"}
           size={30}
-          color={isFavorite ? "#009dff" : "#031417"}
+          color={isFavorite ? "#009dff" : "#009dff"}
         />
       </TouchableOpacity>
 

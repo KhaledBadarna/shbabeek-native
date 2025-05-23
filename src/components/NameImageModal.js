@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { firestore } from "../firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { setUserInfo } from "../redux/slices/userSlice";
-import { setTeacherData } from "../redux/slices/teacherSlice";
+import { setBarberData } from "../redux/slices/barberSlice";
 
 const NameImageModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
@@ -71,7 +71,7 @@ const NameImageModal = ({ visible, onClose }) => {
     return data.secure_url;
   };
   const handleSave = async () => {
-    if (role === "student") {
+    if (role === "client") {
       if (!name.trim()) {
         setInfoText("يرجى إدخال الاسم على الأقل للاستمرار!");
         setInfoVisible(true);
@@ -83,7 +83,7 @@ const NameImageModal = ({ visible, onClose }) => {
       }
     }
 
-    if (role === "teacher") {
+    if (role === "barber") {
       if (!name.trim() && !imageUri) {
         setInfoText("يرجى إدخال الاسم والصورة الشخصية للاستمرار!");
         setInfoVisible(true);
@@ -104,7 +104,7 @@ const NameImageModal = ({ visible, onClose }) => {
     }
 
     try {
-      const collectionName = role === "teacher" ? "teachers" : "students";
+      const collectionName = role === "barber" ? "barbers" : "clients";
       const userRef = doc(firestore, collectionName, userId);
       const data = { name }; // ✅ define it here
 
@@ -127,9 +127,9 @@ const NameImageModal = ({ visible, onClose }) => {
         })
       );
 
-      if (role === "teacher") {
+      if (role === "barber") {
         const updatedDoc = await getDoc(userRef);
-        dispatch(setTeacherData(updatedDoc.data()));
+        dispatch(setBarberData(updatedDoc.data()));
       }
 
       onClose();

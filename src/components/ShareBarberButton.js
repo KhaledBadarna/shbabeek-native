@@ -2,13 +2,13 @@ import React from "react";
 import { TouchableOpacity, Alert, Share } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const ShareTeacherButton = ({ teacherId }) => {
-  const teacherProfileUrl = `https://shbabeek.com/teacher/${teacherId}`;
+const ShareBarberButton = ({ barberId }) => {
+  const barberProfileUrl = `https://shbabeek.com/barber/${barberId}`;
 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `شوف المعلم على Shbabeek:\n${teacherProfileUrl}`,
+        message: `شوف المعلم على Shbabeek:\n${barberProfileUrl}`,
       });
     } catch (error) {
       console.error("Error sharing:", error);
@@ -28,4 +28,4 @@ const ShareTeacherButton = ({ teacherId }) => {
   );
 };
 
-export default ShareTeacherButton;
+export default ShareBarberButton;

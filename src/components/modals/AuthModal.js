@@ -1,3 +1,4 @@
+// AuthModal.js
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -5,10 +6,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserInfo } from "../../redux/slices/userSlice";
-import { setTeacherData } from "../../redux/slices/teacherSlice";
+import { setBarberData } from "../../redux/slices/barberSlice";
 import { setFavorites } from "../../redux/slices/favoritesSlice";
 import { firestore } from "../../firebase";
 import {
@@ -24,15 +28,18 @@ import {
 } from "firebase/firestore";
 import NameImageModal from "../NameImageModal";
 import { registerForPushNotificationsAsync } from "../../utils/notifications/registerForPushNotifications";
-import fetchLessons from "../../utils/fetchLessons";
+import fetchAppointments from "../../utils/fetchAppointments";
 import Modal from "react-native-modal";
 import InfoModal from "./InfoModal";
+import { Dimensions } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+const { height } = Dimensions.get("window");
 const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const dispatch = useDispatch();
   const [step, setStep] = useState("register");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState("client");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [showNameImageModal, setShowNameImageModal] = useState(false);
   const phoneInputRef = useRef(null);
@@ -41,28 +48,28 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
   const [infoVisible, setInfoVisible] = useState(false);
   const [infoText, setInfoText] = useState("");
   useEffect(() => {
+    const filled = otp.every((d) => d.length === 1);
+    if (filled) {
+      confirmOtp();
+    }
+  }, [otp]);
+  useEffect(() => {
     if (visible) {
       setStep("register");
       setPhone("");
       setName("");
       setOtp(["", "", "", ""]);
-
-      setTimeout(() => {
-        if (phoneInputRef.current) phoneInputRef.current.focus();
-      }, 300);
+      setTimeout(() => phoneInputRef.current?.focus(), 300);
     }
   }, [visible]);
 
   useEffect(() => {
-    if (step === "otp" && otpInputs.current[0]) {
-      setTimeout(() => otpInputs.current[0].focus(), 300);
-    }
+    if (step === "otp") setTimeout(() => otpInputs.current[0]?.focus(), 300);
   }, [step]);
 
   const toggleRole = () => {
-    if (mode === "auth") {
-      setRole((prevRole) => (prevRole === "student" ? "teacher" : "student"));
-    }
+    if (mode === "auth")
+      setRole((prevRole) => (prevRole === "client" ? "barber" : "client"));
   };
 
   const handlePhoneSubmit = () => {
@@ -76,27 +83,23 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
 
   const confirmOtp = async () => {
     const cleanedPhone = phone.replace(/-/g, "");
-
-    if (mode === "updatePhone") {
-      if (onConfirm) onConfirm(cleanedPhone);
-    }
-
     const code = otp.join("");
     if (code.length !== 4) return;
 
-    let userRole = role || "student";
-    const collectionName = userRole === "student" ? "students" : "teachers";
+    let userRole = role || "client";
+    const collectionName = userRole === "client" ? "clients" : "barbers";
     let userIdToUse = userId;
     let existingUser = null;
 
     try {
       if (!userIdToUse) {
-        const usersCollectionRef = collection(firestore, collectionName);
-        const q = query(usersCollectionRef, where("phone", "==", cleanedPhone));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          userIdToUse = querySnapshot.docs[0].id;
+        const q = query(
+          collection(firestore, collectionName),
+          where("phone", "==", cleanedPhone)
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          userIdToUse = snapshot.docs[0].id;
         } else {
           const userData = {
             name: "",
@@ -106,101 +109,82 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
             userType: userRole,
           };
 
-          if (userRole === "teacher") {
+          if (userRole === "barber") {
             Object.assign(userData, {
               pendingPayout: 0,
               totalEarned: 0,
-              pricePerHour: "",
-              bio: "",
+              rating: 0,
+              ratingCount: 0,
+              profileImage: "",
+              salonName: "",
+              introVideo: null,
+              isAvailable: false,
+              location: "",
               bankDetails: {
                 fullName: "",
                 bankNumber: "",
                 branchBank: "",
                 accountNumber: "",
               },
-              stages: [],
-              topics: [],
-              rating: 0,
-              ratingCount: 0,
-              lessonsCount: 0,
+              services: {
+                hair: 0,
+                beard: 0,
+                both: 0,
+                kids: 0,
+              },
+              createdAt: new Date().toISOString(),
             });
           } else {
             userData.favorites = [];
           }
 
-          const newUserDocRef = await addDoc(usersCollectionRef, userData);
-          userIdToUse = newUserDocRef.id;
-          userIdToUse = newUserDocRef.id;
-        }
-      }
-
-      // Fetch user data
-      if (userIdToUse) {
-        const userDocRef = doc(firestore, collectionName, userIdToUse);
-        let userSnapshot = await getDoc(userDocRef);
-        if (userSnapshot.exists()) {
-          existingUser = userSnapshot.data();
-
-          // Add missing fields if needed
-          const updates = {};
-          if (userRole === "teacher") {
-            if (existingUser.pendingPayout === undefined)
-              updates.pendingPayout = 0;
-            if (existingUser.totalEarned === undefined) updates.totalEarned = 0;
-            if (!existingUser.bankDetails) {
-              updates.bankDetails = {
-                fullName: "",
-                bankNumber: "",
-                branchBank: "",
-                accountNumber: "",
-              };
-            }
-          }
-
-          if (Object.keys(updates).length > 0) {
-            await setDoc(userDocRef, updates, { merge: true });
-            userSnapshot = await getDoc(userDocRef);
-            existingUser = userSnapshot.data();
-          }
-
-          // Store user in Redux
-          const formattedName = existingUser.name
-            ? existingUser.name.split(" ")[0] +
-              (existingUser.name.split(" ")[1]
-                ? " " + existingUser.name.split(" ")[1][0] + "."
-                : "")
-            : "";
-
-          dispatch(
-            setUserInfo({
-              name: formattedName,
-              phone: existingUser.phone,
-              profileImage: existingUser.profileImage,
-              userId: userIdToUse,
-              defaultPaymentMethod: existingUser.defaultPaymentMethod || "",
-              isLoggedIn: true,
-              userType: userRole,
-            })
+          const newUserRef = await addDoc(
+            collection(firestore, collectionName),
+            userData
           );
-          await registerForPushNotificationsAsync(userIdToUse, userRole);
-          if (userRole === "teacher") {
-            dispatch(setTeacherData(existingUser));
-          } else {
-            dispatch(setFavorites(existingUser.favorites));
-          }
-
-          await fetchLessons(userIdToUse, userRole, dispatch);
+          userIdToUse = newUserRef.id;
         }
       }
 
-      // ✅ Show NameImageModal if required
+      const userDocRef = doc(firestore, collectionName, userIdToUse);
+      let userSnapshot = await getDoc(userDocRef);
+      existingUser = userSnapshot.data();
+
+      const formattedName = existingUser.name
+        ? existingUser.name.split(" ")[0] +
+          (existingUser.name.split(" ")[1]
+            ? " " + existingUser.name.split(" ")[1][0] + "."
+            : "")
+        : "";
+
+      dispatch(
+        setUserInfo({
+          name: formattedName,
+          phone: existingUser.phone,
+          profileImage: existingUser.profileImage,
+          userId: userIdToUse,
+          defaultPaymentMethod: existingUser.defaultPaymentMethod || "",
+          isLoggedIn: true,
+          userType: userRole,
+        })
+      );
+
+      await registerForPushNotificationsAsync(userIdToUse, userRole);
+
+      if (userRole === "barber") {
+        dispatch(setBarberData(existingUser));
+      } else {
+        dispatch(setFavorites(existingUser.favorites || []));
+      }
+
+      await fetchAppointments(userRole, userIdToUse, dispatch);
+
       const needsNameImage =
         !existingUser?.name ||
-        (userRole === "teacher" && !existingUser?.profileImage);
-
+        (userRole === "barber" && !existingUser?.profileImage);
       if (needsNameImage) {
         setShowNameImageModal(true);
-        return; // ⛔ Don't close AuthModal yet
+        return;
       }
 
       onClose();
@@ -209,43 +193,8 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
     }
   };
 
-  const handleUpdateName = async () => {
-    if (!name.trim()) {
-      setInfoText("يرجى إدخال اسم صحيح");
-      setInfoVisible(true);
-      return;
-    } else if (/\d/.test(name.trim())) {
-      setInfoText("❌ الاسم لا يمكن أن يحتوي على أرقام!");
-      setInfoVisible(true);
-      return;
-    }
-
-    if (!userId) {
-      console.error("🚨 Error: User ID is missing!");
-      return;
-    }
-
-    try {
-      const collectionName = userType === "teacher" ? "teachers" : "students";
-      const userDocRef = doc(firestore, collectionName, userId);
-
-      await updateDoc(userDocRef, { name });
-      const formattedName = name
-        ? name.split(" ")[0] +
-          (name.split(" ")[1] ? " " + name.split(" ")[1][0] + "." : "")
-        : "";
-      dispatch(setUserInfo({ name: formattedName }));
-
-      console.log("✅ Name updated successfully!");
-      onClose();
-    } catch (error) {
-      console.error("❌ Error updating name:", error);
-    }
-  };
-  // ✅ Function to format phone number & convert Arabic numbers
   const handlePhoneChange = (text) => {
-    // ✅ Convert Arabic numbers (١٢٣٤٥...) to standard English numbers (12345)
-    const arabicToEnglishMap = {
+    const map = {
       "٠": "0",
       "١": "1",
       "٢": "2",
@@ -257,23 +206,14 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
       "٨": "8",
       "٩": "9",
     };
-    text = text.replace(/[٠-٩]/g, (d) => arabicToEnglishMap[d] || d);
-
-    // ✅ Remove any non-numeric characters
+    text = text.replace(/[٠-٩]/g, (d) => map[d] || d);
     let numericText = text.replace(/\D/g, "");
-
-    // ✅ Ensure max length of 10 digits
-    if (numericText.length > 10) {
-      numericText = numericText.slice(0, 10);
-    }
-
-    // ✅ Apply formatting `054-XXXX-XXX`
+    if (numericText.length > 10) numericText = numericText.slice(0, 10);
     if (numericText.length >= 4) {
       numericText = `${numericText.slice(0, 3)}-${numericText.slice(3, 7)}${
         numericText.length > 7 ? "-" + numericText.slice(7) : ""
       }`;
     }
-
     setPhone(numericText);
   };
 
@@ -281,72 +221,52 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
     <Modal
       isVisible={visible}
       onBackdropPress={onClose}
-      animationIn="slideInUp"
-      animationOut="slideOutUp"
-      backdropColor="#000"
-      backdropOpacity={0.5}
-      useNativeDriver
+      style={{ justifyContent: "flex-end", margin: 0 }} // 👈 bottom-aligned
     >
       <View style={styles.modalContent}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeText}>×</Text>
-        </TouchableOpacity>
-        {mode === "updateName" || step === "updateName" ? (
+        {step === "register" ? (
           <>
-            <Text style={styles.title}>تحديث الاسم</Text>
-            <TextInput
-              textAlign="right"
-              placeholder="أدخل الاسم الجديد"
-              style={styles.input}
-              placeholderTextColor="#999"
-              value={name}
-              onChangeText={setName}
-            />
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleUpdateName}
-            >
-              <Text style={styles.confirmButtonText}>تحديث</Text>
-            </TouchableOpacity>
-          </>
-        ) : step === "register" ? (
-          <>
-            <Text style={styles.title}>
-              {mode === "updatePhone" ? "تحديث رقم الهاتف" : "تسجيل الدخول"}
+            <Text style={styles.title}>تسجيل الدخول</Text>
+            <Text style={styles.subTitle}>
+              استخدم رقم الهاتف للانضمام او لتسجيل الدخول{" "}
             </Text>
-            <TextInput
-              ref={phoneInputRef}
-              textAlign="right"
-              placeholder="رقم الهاتف"
-              style={styles.input}
-              keyboardType="phone-pad"
-              placeholderTextColor="#999"
-              value={phone}
-              onChangeText={handlePhoneChange} // ✅ Format input dynamically
-            />
-            {mode === "auth" && (
-              <TouchableOpacity onPress={toggleRole}>
-                <Text style={styles.roleToggleText}>
-                  {role === "student"
-                    ? "اضغط للدخول كمعلم"
-                    : "اضغط للدخول كطالب"}
-                </Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                ref={phoneInputRef}
+                placeholder="رقم الهاتف"
+                style={styles.input}
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={handlePhoneChange}
+              />
+              <TouchableOpacity
+                style={styles.arrowButton}
+                onPress={handlePhoneSubmit}
+              >
+                <Icon
+                  name="login"
+                  size={30}
+                  color="#ffffff"
+                  style={{ marginRight: 10 }}
+                />
               </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handlePhoneSubmit}
-            >
-              <Text style={styles.confirmButtonText}>التالي</Text>
+            </View>
+            <TouchableOpacity onPress={toggleRole}>
+              <Text style={styles.roleToggleText}>
+                {role === "client" ? "حلاق ؟ اضغط هنا" : "زبون ؟ اضغط هنا"}
+              </Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
             <Text style={styles.title}>تأكيد رقم الهاتف</Text>
-            <Text style={styles.subtitle}>
-              أدخل رمز التحقق المرسل إلى {"\u200E"}
-              {phone}
+            <Text style={styles.subTitle}>
+              ادخل الرمز المكون من 4 أرقام الذي تم إرساله إلى{" "}
+              <Text style={styles.phoneHighlight}>
+                {`\u202A${phone}\u202C`}
+              </Text>
             </Text>
+
             <View style={styles.otpContainer}>
               {otp.map((digit, index) => (
                 <TextInput
@@ -360,15 +280,13 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
                     const newOtp = [...otp];
                     newOtp[index] = text;
                     setOtp(newOtp);
-                    if (text && index < 3)
+                    if (text && index < 3) {
                       otpInputs.current[index + 1]?.focus();
+                    }
                   }}
                 />
               ))}
             </View>
-            <TouchableOpacity style={styles.confirmButton} onPress={confirmOtp}>
-              <Text style={styles.confirmButtonText}>تأكيد</Text>
-            </TouchableOpacity>
           </>
         )}
       </View>
@@ -376,7 +294,7 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
         visible={showNameImageModal}
         onClose={() => {
           setShowNameImageModal(false);
-          onClose(); // close auth modal too
+          onClose();
         }}
       />
       <InfoModal
@@ -387,55 +305,63 @@ const AuthModal = ({ visible, onClose, mode = "auth", onConfirm }) => {
     </Modal>
   );
 };
+
 const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
-    borderRadius: 15,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
-    alignItems: "center",
-    position: "relative",
-  },
-
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#ede9e9",
-    borderRadius: 20,
-    width: 30,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closeText: {
-    fontSize: 20,
-    color: "#009dff",
-    fontWeight: "bold",
+    height: height * 0.6, // 👈 50% of screen
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#031417",
-    marginVertical: 10,
+    marginTop: 10,
     fontFamily: "Cairo",
+    textAlign: "right",
   },
-  subtitle: {
-    fontSize: 14,
-    color: "#777",
+  subTitle: {
+    fontSize: 12,
+    color: "#747474",
+    marginBottom: 10,
     fontFamily: "Cairo",
-    textAlign: "center",
-    marginBottom: 20,
+    textAlign: "right",
   },
   input: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 10,
     fontSize: 17,
     fontFamily: "Cairo",
-    width: "80%",
     paddingVertical: 10,
-    textAlign: "left",
-    paddingLeft: 10,
+    paddingHorizontal: 12,
+    textAlign: "right",
+    marginLeft: 10,
+  },
+  inputRow: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  arrowButton: {
+    backgroundColor: "#009dff",
+    borderRadius: 100,
+    paddingVertical: 14,
+    paddingHorizontal: 11,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  arrowText: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    fontFamily: "Cairo",
   },
   otpContainer: {
     flexDirection: "row",
@@ -468,10 +394,13 @@ const styles = StyleSheet.create({
   },
   roleToggleText: {
     color: "#009dff",
-    fontSize: 15,
-    textAlign: "center",
+    fontSize: 13,
+    textAlign: "right",
     fontFamily: "Cairo",
-    marginTop: 10,
+  },
+  phoneHighlight: {
+    color: "#009dff",
+    fontWeight: "bold",
   },
 });
 

@@ -1,24 +1,24 @@
 import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "../../firebase";
 
-const fetchUserDataByLesson = async (lessonId, currentRole) => {
+const fetchUserDataByLesson = async (appointmentId, currentRole) => {
   try {
-    // Step 1: Fetch the lesson document
-    const lessonDocRef = doc(firestore, "lessons", lessonId);
-    const lessonDoc = await getDoc(lessonDocRef);
+    // Step 1: Fetch the appointment document
+    const appointmentDocRef = doc(firestore, "appointments", appointmentId);
+    const appointmentDoc = await getDoc(appointmentDocRef);
 
-    if (!lessonDoc.exists()) {
+    if (!appointmentDoc.exists()) {
       throw new Error("Lesson not found");
     }
 
-    const lessonData = lessonDoc.data();
+    const appointmentData = appointmentDoc.data();
 
     // Step 2: Determine the related user ID
     const relatedUserId =
-      currentRole === "teacher" ? lessonData.studentId : lessonData.teacherId;
+      currentRole === "barber" ? appointmentData.clientId : appointmentData.barberId;
 
     // Step 3: Fetch the related user's data
-    const userCollection = currentRole === "teacher" ? "students" : "teachers";
+    const userCollection = currentRole === "barber" ? "clients" : "barbers";
     const userDocRef = doc(firestore, userCollection, relatedUserId);
     const userDoc = await getDoc(userDocRef);
 

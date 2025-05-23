@@ -91,7 +91,11 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
         updateData.cardToken = `FAKE-GOOGLE-${Date.now()}`;
         updateData.last4 = "ⓖⓖⓖⓖ";
       }
-      await setDoc(doc(firestore, "students", userId), updateData, {
+      if (selectedMethod === "Cash") {
+        updateData.cardToken = "CASH";
+        updateData.last4 = "----";
+      }
+      await setDoc(doc(firestore, "clients", userId), updateData, {
         merge: true,
       });
       dispatch(setUserInfo(updateData));
@@ -166,6 +170,21 @@ const PaymentMethodModal = ({ visible, setOpenPaymentMethod }) => {
               <Text style={styles.paymentText}>Google Pay</Text>
             </TouchableOpacity>
           )}
+          <TouchableOpacity
+            style={[
+              styles.paymentOption,
+              selectedMethod === "Cash" && styles.selectedOption,
+            ]}
+            onPress={() => handlePaymentSelection("Cash")}
+          >
+            <Icon
+              name="cash"
+              size={28}
+              color="#388e3c"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.paymentText}>نقدًا عند الموعد</Text>
+          </TouchableOpacity>
 
           {selectedMethod === "Visa" && (
             <View style={styles.cardForm}>

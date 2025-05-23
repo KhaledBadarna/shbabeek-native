@@ -22,25 +22,25 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const PAGE_SIZE = 10;
 
-const CompletedLessonsScreen = () => {
+const CompletedAppointmentsScreen = () => {
   const route = useRoute();
   const onTotalCalculated = route.params?.onTotalCalculated;
   const { userId } = useSelector((state) => state.user);
 
-  const [lessons, setLessons] = useState([]);
+  const [appointments, setLessons] = useState([]);
   const [lastDoc, setLastDoc] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
-  const fetchLessons = useCallback(
+  const fetchAppointments = useCallback(
     async (loadMore = false, startAfterDoc = null) => {
       if (loadMore) setLoadingMore(true);
 
       // Base query with filters and ordering
       let baseQuery = query(
-        collection(firestore, "lessons"),
-        where("teacherId", "==", userId),
-        where("isLessonCompleted", "==", true),
-        where("isTeacherPaidOut", "==", true),
+        collection(firestore, "appointments"),
+        where("barberId", "==", userId),
+        where("isAppointmentCompleted", "==", true),
+        where("isBarberPaidOut", "==", true),
         orderBy("selectedDate", "desc"),
         orderBy("startTime", "asc")
       );
@@ -80,8 +80,8 @@ const CompletedLessonsScreen = () => {
   );
 
   useEffect(() => {
-    fetchLessons();
-  }, [fetchLessons]);
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   const renderItem = ({ item }) => (
     <View style={styles.row}>
@@ -90,7 +90,7 @@ const CompletedLessonsScreen = () => {
         <Text style={styles.time}>
           {item.startTime} - {item.endTime}
         </Text>
-        <Text style={styles.topic}>{item.selectedTopic}</Text>
+        <Text style={styles.topic}>{item.serviceType}</Text>
       </View>
       <Text style={styles.price}>{Math.round(item.paidAmount * 0.93)} ₪</Text>
     </View>
@@ -109,12 +109,12 @@ const CompletedLessonsScreen = () => {
       </View>
 
       <FlatList
-        data={lessons}
+        data={appointments}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         onEndReached={() => {
           if (!loadingMore && !allLoaded && lastDoc) {
-            fetchLessons(true, lastDoc);
+            fetchAppointments(true, lastDoc);
           }
         }}
         onEndReachedThreshold={0.5}
@@ -183,4 +183,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CompletedLessonsScreen;
+export default CompletedAppointmentsScreen;

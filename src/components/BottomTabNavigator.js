@@ -4,9 +4,9 @@ import { useSelector, useDispatch } from "react-redux"; // Redux import
 
 import StudentProfileScreen from "../screens/shared/StudentProfileScreen";
 import { setUserInfo } from "../redux/slices/userSlice"; // Redux action
-import TeacherHomeScreen from "../screens/teacher/TeacherHomeScreen";
-import StudentLessonsScreen from "../screens/student/StudentLessonsScreen";
-
+import BarberHomeScreen from "../screens/barber/BarberHomeScreen";
+// import StudentLessonsScreen from "../screens/client/StudentLessonsScreen";
+import SearchBarberScreen from "../screens/client/SearchBarberScreen"; // 🔍 make sure this exists
 import { StatusBar } from "react-native";
 import AuthModal from "../components/modals/AuthModal";
 
@@ -14,14 +14,14 @@ import { MaterialCommunityIcons as Icon } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native";
 import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { firestore } from "../firebase";
-import ChatsListScreen from "../screens/shared/ChatsListScreen";
-import StudentHomeScreen from "../screens/student/StudentHomeScreen";
-import TeacherAvailability from "../screens/teacher/TeacherAvailability";
+
+import ClientHomeScreen from "../screens/client/ClientHomeScreen";
+import ManageAvailabilityScreen from "../screens/barber/ManageAvailabilityScreen";
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   const { isLoggedIn, userId } = useSelector((state) => state.user); // Check if user is logged in
-  const userRole = useSelector((state) => state.user.userType); // Get user role (student/teacher)
+  const userRole = useSelector((state) => state.user.userType); // Get user role (client/barber)
   const [showAuthModal, setShowAuthModal] = useState(false); // Track AuthModal visibility
   const dispatch = useDispatch(); // Redux dispatch function
   const [unreadCount, setUnreadCount] = useState(0);
@@ -67,7 +67,7 @@ const BottomTabNavigator = () => {
               case "الرئيسية":
                 iconName = focused ? "home-account" : "home-account";
                 break;
-              case "دروسي":
+              case "مواعيدي":
                 iconName = focused
                   ? "calendar-clock"
                   : "calendar-clock-outline";
@@ -76,22 +76,6 @@ const BottomTabNavigator = () => {
                 iconName = focused
                   ? "card-account-details"
                   : "card-account-details-outline";
-                break;
-              case "الرسائل":
-                return (
-                  <View>
-                    <Icon
-                      name={focused ? "comment-text" : "comment-text-outline"}
-                      size={size}
-                      color={color}
-                    />
-                    {unreadCount > 0 && (
-                      <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{unreadCount}</Text>
-                      </View>
-                    )}
-                  </View>
-                );
                 break;
               default:
                 iconName = "help";
@@ -116,25 +100,31 @@ const BottomTabNavigator = () => {
         <Tab.Screen
           name="الرئيسية"
           component={
-            userRole === "teacher" ? TeacherHomeScreen : StudentHomeScreen
+            userRole === "barber" ? BarberHomeScreen : ClientHomeScreen
           }
         />
-        <Tab.Screen
-          name="دروسي"
-          component={
-            userRole === "teacher" ? TeacherAvailability : StudentLessonsScreen
-          }
-          listeners={{
-            tabPress: handleProfilePress,
-          }}
-        />
-        <Tab.Screen
-          name="الرسائل"
-          component={ChatsListScreen}
-          listeners={{
-            tabPress: handleProfilePress,
-          }}
-        />
+        {(!isLoggedIn || userRole === "client") && (
+          <Tab.Screen
+            name="بحث"
+            component={SearchBarberScreen}
+            options={{
+              tabBarLabel: "بحث",
+              tabBarIcon: ({ color, size }) => (
+                <Icon name="magnify" size={25} color={color} />
+              ),
+            }}
+          />
+        )}
+        {userRole === "barber" && (
+          <Tab.Screen
+            name="مواعيدي"
+            component={ManageAvailabilityScreen}
+            listeners={{
+              tabPress: handleProfilePress,
+            }}
+          />
+        )}
+
         <Tab.Screen
           name="صفحتي"
           component={StudentProfileScreen}

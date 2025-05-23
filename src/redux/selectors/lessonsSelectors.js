@@ -1,14 +1,20 @@
 import { createSelector } from "reselect";
 
-// ✅ Select lessons state from Redux
-const selectLessonsState = (state) => state.lessons;
+// ✅ Select appointments state from Redux
+const selectAppointmentsState = (state) => state.appointments;
 
-// ✅ Memoized selector that ensures lessons return a consistent reference
-export const selectLessons = createSelector([selectLessonsState], (lessons) => {
-  if (!lessons || !Array.isArray(lessons)) return [];
+// ✅ Memoized selector to normalize appointments data
+export const selectAppointments = createSelector(
+  [selectAppointmentsState],
+  (appointments) => {
+    if (!appointments || !Array.isArray(appointments)) return [];
 
-  return lessons.map((lesson) => ({
-    ...lesson,
-    oppositeUser: lesson.oppositeUser || { name: "Unknown", profileImage: "" }, // ✅ Ensure oppositeUser is always present
-  }));
-});
+    return appointments.map((appointment) => ({
+      ...appointment,
+      oppositeUser: appointment.oppositeUser || {
+        name: "Unknown",
+        profileImage: "",
+      },
+    }));
+  }
+);

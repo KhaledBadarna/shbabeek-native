@@ -7,7 +7,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { firestore } from "../../firebase";
 
 const ProfitsScreen = () => {
-  const { userId } = useSelector((state) => state.user); // Get current teacher ID
+  const { userId } = useSelector((state) => state.user); // Get current barber ID
   const navigation = useNavigation();
 
   const [totalEarned, setTotalEarned] = useState(0);
@@ -16,7 +16,7 @@ const ProfitsScreen = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const ref = doc(firestore, "teachers", userId);
+    const ref = doc(firestore, "barbers", userId);
     const unsubscribe = onSnapshot(ref, (snapshot) => {
       const data = snapshot.data();
       setTotalEarned(data.totalEarned || 0);
@@ -33,7 +33,7 @@ const ProfitsScreen = () => {
       </View>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("CompletedLessonsScreen")}
+        onPress={() => navigation.navigate("CompletedAppointmentsScreen")}
         style={styles.card}
       >
         <Icon name="cash-check" size={40} color="#009dff" style={styles.icon} />

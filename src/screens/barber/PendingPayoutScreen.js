@@ -5,18 +5,18 @@ import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-const PendingPayoutLessonsScreen = () => {
+const PendingPayoutScreen = () => {
   const { userId } = useSelector((state) => state.user);
-  const [lessons, setLessons] = useState([]);
+  const [appointments, setLessons] = useState([]);
 
   useEffect(() => {
-    const fetchLessons = async () => {
+    const fetchAppointments = async () => {
       try {
         const q = query(
-          collection(firestore, "lessons"),
-          where("teacherId", "==", userId),
-          where("isLessonCompleted", "==", true),
-          where("isTeacherPaidOut", "==", false),
+          collection(firestore, "appointments"),
+          where("barberId", "==", userId),
+          where("isAppointmentCompleted", "==", true),
+          where("isBarberPaidOut", "==", false),
           orderBy("selectedDate", "desc"),
           orderBy("startTime", "asc")
         );
@@ -27,13 +27,13 @@ const PendingPayoutLessonsScreen = () => {
           ...doc.data(),
         }));
         setLessons(data);
-        console.log("📦 Pending lessons fetched:", data.length);
+        console.log("📦 Pending appointments fetched:", data.length);
       } catch (error) {
-        console.error("❌ Error fetching pending payout lessons:", error);
+        console.error("❌ Error fetching pending payout appointments:", error);
       }
     };
 
-    fetchLessons();
+    fetchAppointments();
   }, [userId]);
 
   const renderItem = ({ item }) => (
@@ -43,7 +43,7 @@ const PendingPayoutLessonsScreen = () => {
         <Text style={styles.time}>
           {item.startTime} - {item.endTime}
         </Text>
-        <Text style={styles.topic}>{item.selectedTopic}</Text>
+        <Text style={styles.topic}>{item.serviceType}</Text>
       </View>
       <Text style={styles.price}>{Math.round(item.paidAmount * 0.93)} ₪</Text>
     </View>
@@ -62,7 +62,7 @@ const PendingPayoutLessonsScreen = () => {
       </View>
 
       <FlatList
-        data={lessons}
+        data={appointments}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
@@ -120,4 +120,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PendingPayoutLessonsScreen;
+export default PendingPayoutScreen;

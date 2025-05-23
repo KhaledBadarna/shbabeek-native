@@ -1,23 +1,22 @@
+// App.js (updated)
 import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Provider } from "react-redux";
 import store from "./src/redux/store";
 import BottomTabNavigator from "./src/components/BottomTabNavigator";
-import TeacherInfoScreen from "./src/screens/student/TeacherInfoScreen";
-import TopicTeachersScreen from "./src/screens/student/TopicTeachersScreen";
+import BarberInfoScreen from "./src/screens/client/BarberInfoScreen";
 import AuthModal from "./src/components/modals/AuthModal";
-import EditBioScreen from "./src/screens/teacher/EditBioScreen";
-import BookingScreen from "./src/screens/student/BookingScreen";
-import TeacherBookingScreen from "./src/screens/student/TeacherBookingScreen";
-import BankDetailsScreen from "./src/screens/teacher/BankDetailsScreen";
-import TeacherSettingsScreen from "./src/screens/teacher/TeacherSettingsScreen";
-import ProfitsScreen from "./src/screens/teacher/ProfitsScreen";
-import LessonCallScreen from "./src/screens/shared/LessonCallScreen";
-import ChatScreen from "./src/screens/shared/ChatScreen";
-import CompletedLessonsScreen from "./src/screens/teacher/CompletedLessonsScreen";
-import PendingPayoutLessonsScreen from "./src/screens/teacher/PendingPayoutLessonsScreen";
-import TeacherAvailability from "./src/screens/teacher/TeacherAvailability";
+import BookingScreen from "./src/screens/client/BookingScreen";
+
+import BankDetailsScreen from "./src/screens/barber/BankDetailsScreen";
+import BarberSettingsScreen from "./src/screens/barber/BarberSettingsScreen";
+import ProfitsScreen from "./src/screens/barber/ProfitsScreen";
+import CompletedAppointmentsScreen from "./src/screens/barber/CompletedAppointmentsScreen";
+import PendingPayoutScreen from "./src/screens/barber/PendingPayoutScreen";
+import SearchBarberScreen from "./src/screens/client/SearchBarberScreen";
+import ManageAvailabilityScreen from "./src/screens/barber/ManageAvailabilityScreen";
+import BarberAvailabilityScreen from "./src/screens/client/BarberAvailabilityScreen";
 import * as Notifications from "expo-notifications";
 import { View, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
@@ -31,7 +30,7 @@ const linking = {
   prefixes: ["shbabeek://"],
   config: {
     screens: {
-      "صفحة المعلم": "teacher/:teacherId",
+      "صفحة الحلاق": "barber/:barberId",
     },
   },
 };
@@ -89,7 +88,7 @@ export default function App() {
             },
             headerTintColor: "#0a0a0a",
             headerTitleStyle: {
-              fontFamily: "Cairo_400Regular", // ✅ Use loaded font
+              fontFamily: "Cairo_400Regular",
               fontSize: 15,
             },
             headerBackTitleVisible: false,
@@ -100,31 +99,18 @@ export default function App() {
             component={BottomTabNavigator}
             options={{ headerShown: false }}
           />
+
           <Stack.Screen
-            name="TopicTeachersScreen"
-            component={TopicTeachersScreen}
-            options={({ route }) => ({
-              title: `معلمي ${route.params?.topic.name || ""}`,
-            })}
-          />
-          <Stack.Screen
-            name="صفحة المعلم"
-            component={TeacherInfoScreen}
-            options={{ title: "صفحة المعلم" }}
+            name="صفحة الحلاق"
+            component={BarberInfoScreen}
+            options={{ title: "صفحة الحلاق" }}
           />
           <Stack.Screen
             name="AuthModal"
             component={AuthModal}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="EditBioScreen"
-            component={EditBioScreen}
-            options={{
-              title: "تعديل النبذة",
-              headerBackTitle: "رجوع",
-            }}
-          />
+
           <Stack.Screen
             name="BankDetailsScreen"
             component={BankDetailsScreen}
@@ -137,31 +123,16 @@ export default function App() {
             name="BookingScreen"
             component={BookingScreen}
             options={{
-              title: "حجز درس",
+              title: "حجز موعد",
               headerBackTitle: "رجوع",
             }}
           />
+
           <Stack.Screen
-            name="TeacherBookingScreen"
-            component={TeacherBookingScreen}
+            name="BarberSettingsScreen"
+            component={BarberSettingsScreen}
             options={{
-              title: "حجز درس",
-              headerBackTitle: "رجوع",
-            }}
-          />
-          <Stack.Screen
-            name="ChatScreen"
-            component={ChatScreen}
-            options={{
-              title: "الرسائل",
-              headerBackTitle: "رجوع",
-            }}
-          />
-          <Stack.Screen
-            name="TeacherSettingsScreen"
-            component={TeacherSettingsScreen}
-            options={{
-              title: "ملف المعلم",
+              title: "ملف الحلاق",
               headerBackTitle: "صفحتي",
             }}
           />
@@ -169,29 +140,35 @@ export default function App() {
             name="ProfitsScreen"
             component={ProfitsScreen}
             options={{
-              title: "ارباحي",
+              title: "أرباحي",
               headerBackTitle: "صفحتي",
             }}
           />
+
           <Stack.Screen
-            name="LessonCallScreen"
-            component={LessonCallScreen}
-            options={{ headerShown: false }}
+            name="CompletedAppointmentsScreen"
+            component={CompletedAppointmentsScreen}
+            options={{ title: "المواعيد المدفوعة" }}
           />
           <Stack.Screen
-            name="CompletedLessonsScreen"
-            component={CompletedLessonsScreen}
-            options={{ title: "الدروس المدفوعة" }}
+            name="PendingPayoutScreen"
+            component={PendingPayoutScreen}
+            options={{ title: "المواعيد المكتملة" }}
           />
           <Stack.Screen
-            name="PendingPayoutLessonsScreen"
-            component={PendingPayoutLessonsScreen}
-            options={{ title: "الدروس المكتملة" }}
+            name="ManageAvailabilityScreen"
+            component={ManageAvailabilityScreen}
+            options={{ title: "مواعيدي" }}
           />
           <Stack.Screen
-            name="TeacherAvailability"
-            component={TeacherAvailability}
-            options={{ title: "الدروس المكتملة" }}
+            name="BarberAvailabilityScreen"
+            component={BarberAvailabilityScreen}
+            options={{ title: "اوقات متاحة" }}
+          />
+          <Stack.Screen
+            name="SearchBarberScreen"
+            component={SearchBarberScreen}
+            options={{ title: "بحث" }}
           />
         </Stack.Navigator>
       </NavigationContainer>

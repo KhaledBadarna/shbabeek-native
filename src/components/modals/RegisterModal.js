@@ -14,7 +14,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const RegisterModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState("client");
   const [phone, setPhone] = useState("");
 
   // ✅ Function to format phone number as `054-XXXX-XXX`
@@ -81,10 +81,10 @@ const RegisterModal = ({ visible, onClose }) => {
           </View>
 
           <Text
-            onPress={() => setRole(role === "student" ? "teacher" : "student")}
-            style={styles.teacherButtonText}
+            onPress={() => setRole(role === "client" ? "barber" : "client")}
+            style={styles.barberButtonText}
           >
-            {role === "student" ? "استاذ ؟ اضغط هنا !" : "طالب ؟ اضغط هنا !"}
+            {role === "client" ? "استاذ ؟ اضغط هنا !" : "طالب ؟ اضغط هنا !"}
           </Text>
         </View>
       </View>
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     paddingLeft: 10,
   },
-  teacherButtonText: {
+  barberButtonText: {
     color: "#0eabe4",
     fontSize: 13,
     textAlign: "center",

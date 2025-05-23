@@ -29,11 +29,7 @@ const WeeklyDateSelector = ({
   const [hasInitialized, setHasInitialized] = useState(false);
   const [dates, setDates] = useState([]);
   const scrollViewRef = useRef(null);
-  const toLocalDateString = (date) => {
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().split("T")[0];
-  };
+
   useFocusEffect(
     useCallback(() => {
       const today = new Date();
@@ -101,7 +97,7 @@ const WeeklyDateSelector = ({
               return slot.day === dayName;
             }
 
-            if (type === "lessons") {
+            if (type === "appointments") {
               return slot.selectedDate === dateStr;
             }
 

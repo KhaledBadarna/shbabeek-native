@@ -29,7 +29,7 @@ export async function registerForPushNotificationsAsync(userId, userType) {
       return;
     }
 
-    const collectionName = userType === "teacher" ? "teachers" : "students";
+    const collectionName = userType === "barber" ? "barbers" : "clients";
     const userRef = doc(firestore, collectionName, userId);
     await updateDoc(userRef, { pushToken: token });
 
